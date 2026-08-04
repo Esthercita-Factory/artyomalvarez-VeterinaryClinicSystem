@@ -1,0 +1,21 @@
+# Rider
+.idea/
+
+# Visual Studio
+.vs/
+
+# Compilación .NET
+bin/
+obj/
+
+# Archivos de usuario
+*.user
+*.suo
+*.DotSettings.user
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
