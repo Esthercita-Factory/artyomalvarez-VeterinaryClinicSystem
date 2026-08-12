@@ -9,7 +9,7 @@ public class Pet
     public string Sintoma { get; set; }
     public string Especie { get; set; }
 
-    public pet(int id, string nombre, int edadEnMeses, double peso, string sintoma, string specie)
+    public Pet(int id, string nombre, int edadEnMeses, double peso, string sintoma, string specie)
     {
         Id = id;
         Nombre = nombre;
@@ -22,7 +22,7 @@ public class Pet
 
     public void Prensentacion(int dia)
     {
-        Console.WriteLine($"el animal {Id} se esta presentando")
+        Console.WriteLine($"el animal {Id} se esta presentando");
     }
      
 }

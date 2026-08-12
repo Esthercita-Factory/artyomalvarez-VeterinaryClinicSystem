@@ -17,7 +17,17 @@ public class Patient
 
     public void RegistrarPaciente(List<Patient> patients)
     {
+        Console.Write("Ingrese el nombre: ");
+        string nombre = Console.ReadLine()!;
 
+        Console.Write("Ingrese la edad: ");
+        byte edad = byte.Parse(Console.ReadLine()!);
+
+        Console.Write("Ingrese los síntomas: ");
+        string sintomas = Console.ReadLine()!;
+
+        Patient nuevoPaciente = new Patient(Guid.NewGuid(), nombre, edad, sintomas);
+        patients.Add(nuevoPaciente);
     }
 
     public void ListarPacientes(List<Patient> patients)
