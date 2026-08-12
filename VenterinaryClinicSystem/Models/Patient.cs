@@ -32,7 +32,21 @@ public class Patient
     
     public void BuscarPacientes(List<Patient> patients, string nombre)
     {
-    }
+        bool encontrado = false;
+        foreach (var patient in patients)
+        {
+            if (patient.Nombre == nombre)
+            {
+                Console.WriteLine(patient.Nombre);
+                break;
+            }
+        }
+
+        if (!encontrado)
+        {
+            Console.WriteLine("Paciente No encontrado");
+        }
+    }   
     
  
     
