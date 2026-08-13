@@ -15,39 +15,87 @@ public class Patient
         Sintomas = sintomas;
     }
 
-    public void RegistrarPaciente(List<Patient> patients)
+    public static void RegistrarPaciente(List<Patient> patients)
     {
+        // 1. Validar nombre vacío
         Console.Write("Ingrese el nombre: ");
         string nombre = Console.ReadLine()!;
+        while (string.IsNullOrWhiteSpace(nombre))
+        {
+            Console.Write("El nombre no puede estar vacío. Ingrese el nombre: ");
+            nombre = Console.ReadLine()!;
+        }
 
-        Console.Write("Ingrese la edad: ");
-        byte edad = byte.Parse(Console.ReadLine()!);
-
+        // 2. Validar edad inválida o fuera de rango
+        byte edad = 0;
+        bool edadValida = false;
+        while (!edadValida)
+        {
+            Console.Write("Ingrese la edad: ");
+            try
+            {
+                edad = byte.Parse(Console.ReadLine()!);
+                if (edad == 0)
+                {
+                    Console.WriteLine("La edad debe ser mayor a 0.");
+                }
+                else
+                {
+                    edadValida = true;
+                }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Ingrese una edad válida (solo números).");
+            }
+            catch (OverflowException)
+            {
+                Console.WriteLine("La edad está fuera del rango (1 a 255).");
+            }
+        }
+        
+        // 3. Validar síntomas vacíos
         Console.Write("Ingrese los síntomas: ");
         string sintomas = Console.ReadLine()!;
+        while (string.IsNullOrWhiteSpace(sintomas))
+        {
+            Console.Write("Los síntomas no pueden estar vacíos. Ingrese los síntomas: ");
+            sintomas = Console.ReadLine()!;
+        }
 
+        // Crear y guardar el paciente
         Patient nuevoPaciente = new Patient(Guid.NewGuid(), nombre, edad, sintomas);
         patients.Add(nuevoPaciente);
+        Console.WriteLine("\n¡Paciente registrado con éxito!");
     }
 
-    public void ListarPacientes(List<Patient> patients)
+    public static void ListarPacientes(List<Patient> patients)
     {
+        if (patients.Count == 0)
+        {
+            Console.WriteLine("\nNo hay pacientes registrados.");
+            return;
+        }
+
         foreach (var patient in patients)
         {
-            Console.WriteLine(patient.Nombre);
-            Console.WriteLine(patient.Edad);
-            Console.WriteLine(patient.Sintomas);
+            Console.WriteLine($"\nNombre: {patient.Nombre}");
+            Console.WriteLine($"Edad: {patient.Edad}");
+            Console.WriteLine($"Síntomas: {patient.Sintomas}");
         }
     }
     
-    public void BuscarPacientes(List<Patient> patients, string nombre)
+    public static void BuscarPacientes(List<Patient> patients, string nombre)
     {
         bool encontrado = false;
         foreach (var patient in patients)
         {
-            if (patient.Nombre == nombre)
+            if (patient.Nombre.ToLower() == nombre.ToLower())
             {
-                Console.WriteLine(patient.Nombre);
+                Console.WriteLine($"\nNombre: {patient.Nombre}");
+                Console.WriteLine($"Edad: {patient.Edad}");
+                Console.WriteLine($"Síntomas: {patient.Sintomas}");
+                encontrado = true;
                 break;
             }
         }
@@ -57,7 +105,4 @@ public class Patient
             Console.WriteLine("Paciente No encontrado");
         }
     }   
-    
- 
-    
 }

@@ -1,7 +1,6 @@
 using VenterinaryClinicSystem.Models;
 
 List<Patient> pacientes = new List<Patient>();
-Patient gestorPacientes = new Patient(Guid.NewGuid(), "", 0, "");
 bool salir = false;
 
 while (!salir)
@@ -18,18 +17,19 @@ while (!salir)
     switch (opcion)
     {
         case "1":
-            gestorPacientes.RegistrarPaciente(pacientes);
+            Patient.RegistrarPaciente(pacientes);
             break;
         case "2":
-            gestorPacientes.ListarPacientes(pacientes);
+            Patient.ListarPacientes(pacientes);
             break;
         case "3":
             Console.Write("Ingrese el nombre del paciente a buscar: ");
             string nombre = Console.ReadLine()!;
-            gestorPacientes.BuscarPacientes(pacientes, nombre);
+            Patient.BuscarPacientes(pacientes, nombre);
             break;
         case "4":
             salir = true;
+            Console.WriteLine("¡Hasta luego!");
             break;
         default:
             Console.WriteLine("Opción no válida.");
