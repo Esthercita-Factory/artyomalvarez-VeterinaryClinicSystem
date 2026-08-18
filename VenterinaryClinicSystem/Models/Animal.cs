@@ -2,12 +2,12 @@ namespace VenterinaryClinicSystem.Models;
 
 public abstract class Animal : IRegistrable
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Nombre { get; set; }
     public int EdadEnMeses { get; set; }
     public string Especie { get; set; }
 
-    public Animal(int id, string nombre, int edadEnMeses, string especie)
+    public Animal(Guid id, string nombre, int edadEnMeses, string especie)
     {
         Id = id;
         Nombre = nombre;

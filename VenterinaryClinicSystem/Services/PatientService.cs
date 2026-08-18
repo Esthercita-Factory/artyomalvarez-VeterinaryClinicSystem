@@ -22,14 +22,14 @@ public class PatientService
     private void CargarDatosIniciales()
     {
         var p1 = new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo de rutina");
-        p1.Mascotas.Add(new Pet(101, "Firulais", 24, 12.5, "Vacunación", "Perro"));
-        p1.Mascotas.Add(new Pet(102, "Michi", 12, 4.0, "Fiebre", "Gato"));
+        p1.Mascotas.Add(new Pet(Guid.NewGuid(), "Firulais", 24, 12.5, "Vacunación", "Perro"));
+        p1.Mascotas.Add(new Pet(Guid.NewGuid(), "Michi", 12, 4.0, "Fiebre", "Gato"));
 
         var p2 = new Patient(Guid.NewGuid(), "Ana Gómez", 28, "Consulta general");
-        p2.Mascotas.Add(new Pet(103, "Rex", 36, 20.0, "Cojera", "Perro"));
+        p2.Mascotas.Add(new Pet(Guid.NewGuid(), "Rex", 36, 20.0, "Cojera", "Perro"));
 
         var p3 = new Patient(Guid.NewGuid(), "Beatriz López", 42, "Control de peso");
-        p3.Mascotas.Add(new Pet(104, "Garfield", 48, 6.5, "Sobrepeso", "Gato"));
+        p3.Mascotas.Add(new Pet(Guid.NewGuid(), "Garfield", 48, 6.5, "Sobrepeso", "Gato"));
 
         // Agregar a la lista
         _pacientes.Add(p1);
@@ -293,7 +293,7 @@ public class PatientService
         Trabajador drVet = new Trabajador(Guid.NewGuid(), "Dra. Laura Martínez", 38, "555-1234", "Veterinaria Principal", "Cirugía y Medicina General");
         
         Patient pacientePrueba = _pacientes.FirstOrDefault() ?? new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo", "555-9876");
-        Pet mascotaPrueba = pacientePrueba.Mascotas.FirstOrDefault() ?? new Pet(1, "Firulais", 24, 12.5, "Vacunación", "Perro", "Labrador");
+        Pet mascotaPrueba = pacientePrueba.Mascotas.FirstOrDefault() ?? new Pet(Guid.NewGuid(), "Firulais", 24, 12.5, "Vacunación", "Perro", "Labrador");
 
         Console.WriteLine("\n1. Demostración de Información (Clases e Interfaces IRegistrable):");
         drVet.MostrarInformacion();

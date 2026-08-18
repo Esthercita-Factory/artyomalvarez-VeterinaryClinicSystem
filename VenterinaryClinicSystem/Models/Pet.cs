@@ -9,7 +9,7 @@ public class Pet : Animal
     public string Sintoma { get; set; }
     public string Raza { get; set; }
 
-    public Pet(int id, string nombre, int edadEnMeses, double peso, string sintoma, string especie, string raza = "Sin Raza")
+    public Pet(Guid id, string nombre, int edadEnMeses, double peso, string sintoma, string especie, string raza = "Sin Raza")
         : base(id, nombre, edadEnMeses, especie)
     {
         Peso = peso;
