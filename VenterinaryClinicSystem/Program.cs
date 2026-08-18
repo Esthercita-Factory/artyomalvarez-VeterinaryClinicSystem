@@ -1,15 +1,18 @@
-using VenterinaryClinicSystem.Models;
+using VenterinaryClinicSystem.Services;
 
-List<Patient> pacientes = new List<Patient>();
+PatientService patientService = new PatientService();
 bool salir = false;
 
 while (!salir)
 {
-    Console.WriteLine("\n--- MENU DE PACIENTES ---");
+    Console.WriteLine("\n--- MENU DE PACIENTES Y LINQ ---");
     Console.WriteLine("1. Registrar paciente");
     Console.WriteLine("2. Listar pacientes");
-    Console.WriteLine("3. Buscar paciente");
-    Console.WriteLine("4. Salir");
+    Console.WriteLine("3. Buscar paciente (LINQ FirstOrDefault)");
+    Console.WriteLine("4. Demostrar consultas LINQ básicas (Task 2)");
+    Console.WriteLine("5. Demostrar consultas LINQ encadenadas (Task 4)");
+    Console.WriteLine("6. Demostrar problemas prácticos LINQ (Task 5)");
+    Console.WriteLine("7. Salir");
     Console.Write("Seleccione una opción: ");
 
     string opcion = Console.ReadLine()!;
@@ -17,17 +20,24 @@ while (!salir)
     switch (opcion)
     {
         case "1":
-            Patient.RegistrarPaciente(pacientes);
+            patientService.RegistrarPaciente();
             break;
         case "2":
-            Patient.ListarPacientes(pacientes);
+            patientService.ListarPacientes();
             break;
         case "3":
-            Console.Write("Ingrese el nombre del paciente a buscar: ");
-            string nombre = Console.ReadLine()!;
-            Patient.BuscarPacientes(pacientes, nombre);
+            patientService.BuscarPaciente();
             break;
         case "4":
+            patientService.DemostrarSintaxisLinq();
+            break;
+        case "5":
+            patientService.DemostrarConsultasEncadenadas();
+            break;
+        case "6":
+            patientService.DemostrarProblemasPracticos();
+            break;
+        case "7":
             salir = true;
             Console.WriteLine("¡Hasta luego!");
             break;
