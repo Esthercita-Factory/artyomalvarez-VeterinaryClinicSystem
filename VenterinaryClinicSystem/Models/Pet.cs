@@ -1,28 +1,35 @@
+using System;
+
 namespace VenterinaryClinicSystem.Models;
 
-public class Pet
+// Pet hereda de Animal (Herencia)
+public class Pet : Animal
 {
-    public int Id { get; set; }
-    public string Nombre { get; set; }
-    public int EdadEnMeses{ get; set; }
     public double Peso { get; set; }
     public string Sintoma { get; set; }
-    public string Especie { get; set; }
+    public string Raza { get; set; }
 
-    public Pet(int id, string nombre, int edadEnMeses, double peso, string sintoma, string specie)
+    public Pet(int id, string nombre, int edadEnMeses, double peso, string sintoma, string especie, string raza = "Sin Raza")
+        : base(id, nombre, edadEnMeses, especie)
     {
-        Id = id;
-        Nombre = nombre;
-        EdadEnMeses = edadEnMeses;
         Peso = peso;
         Sintoma = sintoma;
-        Especie = specie;
+        Raza = raza;
     }
 
-
-    public void Prensentacion(int dia)
+    // Polimorfismo: Sobrescribir (override) el método EmitirSonido según la especie
+    public override string EmitirSonido()
     {
-        Console.WriteLine($"el animal {Id} se esta presentando");
+        if (Especie.Equals("Perro", StringComparison.OrdinalIgnoreCase))
+            return "¡Guau Guau!";
+        if (Especie.Equals("Gato", StringComparison.OrdinalIgnoreCase))
+            return "¡Miau Miau!";
+        
+        return "¡Sonido animal!";
     }
-     
+
+    public override void MostrarInformacion()
+    {
+        Console.WriteLine($"[MASCOTA] ID: {Id} | Nombre: {Nombre} | Especie: {Especie} | Raza: {Raza} | Edad: {EdadEnMeses} meses | Peso: {Peso}kg");
+    }
 }

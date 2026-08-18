@@ -1,24 +1,23 @@
+using System;
 using System.Collections.Generic;
 
 namespace VenterinaryClinicSystem.Models;
 
-public class Patient
+// Patient hereda de Persona e implementa la abstracción
+public class Patient : Persona
 {
-    // Propiedades automáticas básicas
-    public Guid Id { get; set; }
-    public string Nombre { get; set; }
-    public int Edad { get; set; }
     public string Sintoma { get; set; }
-
-    // Relación con su lista de mascotas
     public List<Pet> Mascotas { get; set; }
 
-    public Patient(Guid id, string nombre, int edad, string sintoma)
+    public Patient(Guid id, string nombre, int edad, string sintoma, string telefono = "000-000-0000") 
+        : base(id, nombre, edad, telefono)
     {
-        Id = id;
-        Nombre = nombre;
-        Edad = edad;
         Sintoma = sintoma;
         Mascotas = new List<Pet>();
+    }
+
+    public override void MostrarInformacion()
+    {
+        Console.WriteLine($"[PACIENTE] ID: {Id} | Nombre: {Nombre} | Edad: {Edad} | Teléfono: {Telefono} | Síntoma: {Sintoma}");
     }
 }

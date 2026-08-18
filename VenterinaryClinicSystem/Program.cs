@@ -12,7 +12,8 @@ while (!salir)
     Console.WriteLine("4. Demostrar consultas LINQ básicas (Task 2)");
     Console.WriteLine("5. Demostrar consultas LINQ encadenadas (Task 4)");
     Console.WriteLine("6. Demostrar problemas prácticos LINQ (Task 5)");
-    Console.WriteLine("7. Salir");
+    Console.WriteLine("7. Demostrar POO: Herencia, Polimorfismo y Servicios (M5.3S3)");
+    Console.WriteLine("8. Salir");
     Console.Write("Seleccione una opción: ");
 
     string opcion = Console.ReadLine()!;
@@ -38,6 +39,9 @@ while (!salir)
             patientService.DemostrarProblemasPracticos();
             break;
         case "7":
+            patientService.DemostrarPooHerenciaYPolimorfismo();
+            break;
+        case "8":
             salir = true;
             Console.WriteLine("¡Hasta luego!");
             break;

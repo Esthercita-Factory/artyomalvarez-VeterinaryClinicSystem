@@ -283,4 +283,45 @@ public class PatientService
             Console.WriteLine($"   - {nombre}");
         }
     }
+
+    // HISTORIA M5.3S3: Demostrar Herencia, Polimorfismo, Abstracción e Interfaces
+    public void DemostrarPooHerenciaYPolimorfismo()
+    {
+        Console.WriteLine("\n=== HISTORIA M5.3S3: DEMOSTRACIÓN POO Y HERENCIA ===");
+
+        // 1. Instanciación y Herencia (Persona -> Trabajador / Patient, Animal -> Pet)
+        Trabajador drVet = new Trabajador(Guid.NewGuid(), "Dra. Laura Martínez", 38, "555-1234", "Veterinaria Principal", "Cirugía y Medicina General");
+        
+        Patient pacientePrueba = _pacientes.FirstOrDefault() ?? new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo", "555-9876");
+        Pet mascotaPrueba = pacientePrueba.Mascotas.FirstOrDefault() ?? new Pet(1, "Firulais", 24, 12.5, "Vacunación", "Perro", "Labrador");
+
+        Console.WriteLine("\n1. Demostración de Información (Clases e Interfaces IRegistrable):");
+        drVet.MostrarInformacion();
+        pacientePrueba.MostrarInformacion();
+        mascotaPrueba.MostrarInformacion();
+
+        // 2. Demostración de Polimorfismo con EmitirSonido()
+        Console.WriteLine("\n2. Demostración de Polimorfismo (Animal.EmitirSonido):");
+        foreach (var paciente in _pacientes)
+        {
+            foreach (var m in paciente.Mascotas)
+            {
+                Console.WriteLine($"   - La mascota {m.Nombre} ({m.Especie}) emite el sonido: {m.EmitirSonido()}");
+            }
+        }
+
+        // 3. Demostración de Abstracción con Clase Abstracta ServicioVeterinario y Atender()
+        Console.WriteLine("\n3. Demostración de Servicios Veterinarios (Abstracción con ServicioVeterinario):");
+        ServicioVeterinario consulta = new ConsultaGeneral(drVet);
+        ServicioVeterinario vacunacion = new Vacunacion(drVet, "Triple Felina / Antirrábica");
+
+        // Polimorfismo: Llamada al mismo método Atender() desde diferentes subclases de ServicioVeterinario
+        consulta.Atender(pacientePrueba, mascotaPrueba);
+        
+        var michi = pacientePrueba.Mascotas.FirstOrDefault(m => m.Especie.Equals("Gato", StringComparison.OrdinalIgnoreCase));
+        if (michi != null)
+        {
+            vacunacion.Atender(pacientePrueba, michi);
+        }
+    }
 }
