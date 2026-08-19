@@ -2,7 +2,6 @@ using System;
 
 namespace VenterinaryClinicSystem.Models;
 
-// Pet hereda de Animal (Herencia)
 public class Pet : Animal
 {
     public double Peso { get; set; }
@@ -17,7 +16,6 @@ public class Pet : Animal
         Raza = raza;
     }
 
-    // Polimorfismo: Sobrescribir (override) el método EmitirSonido según la especie
     public override string EmitirSonido()
     {
         if (Especie.Equals("Perro", StringComparison.OrdinalIgnoreCase))
@@ -28,8 +26,8 @@ public class Pet : Animal
         return "¡Sonido animal!";
     }
 
-    public override void MostrarInformacion()
+    public override string ObtenerInformacion()
     {
-        Console.WriteLine($"[MASCOTA] ID: {Id} | Nombre: {Nombre} | Especie: {Especie} | Raza: {Raza} | Edad: {EdadEnMeses} meses | Peso: {Peso}kg");
+        return $"[MASCOTA] ID: {Id} | Nombre: {Nombre} | Especie: {Especie} | Raza: {Raza} | Edad: {EdadEnMeses} meses | Peso: {Peso}kg";
     }
 }

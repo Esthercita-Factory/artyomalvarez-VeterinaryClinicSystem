@@ -4,12 +4,12 @@ using System.IO;
 namespace VenterinaryClinicSystem.Services;
 
 /// <summary>
-/// TASK 6: Sistema de registro de errores (Logging básico).
-/// Escribe logs formateados en consola y guarda trazas de auditoría/error en un archivo local (app.log).
+/// TASK 6: Sistema de registro de errores (Logging básico con rotación/límite de tamaño).
 /// </summary>
 public static class LoggerService
 {
     private static readonly string LogFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.log");
+    private const long MaxLogFileSizeBytes = 1 * 1024 * 1024; // Límite de 1MB para prevenir consumo excesivo de disco
 
     public static void LogInfo(string mensaje)
     {
@@ -17,7 +17,7 @@ public static class LoggerService
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine(registro);
         Console.ResetColor();
-        EscribirEnArchivo(registro);
+        EscribirEnArchivoConRotacion(registro);
     }
 
     public static void LogWarning(string mensaje)
@@ -26,7 +26,7 @@ public static class LoggerService
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine(registro);
         Console.ResetColor();
-        EscribirEnArchivo(registro);
+        EscribirEnArchivoConRotacion(registro);
     }
 
     public static void LogError(string mensaje, Exception? ex = null)
@@ -40,13 +40,20 @@ public static class LoggerService
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(registro);
         Console.ResetColor();
-        EscribirEnArchivo(registro);
+        EscribirEnArchivoConRotacion(registro);
     }
 
-    private static void EscribirEnArchivo(string contenido)
+    private static void EscribirEnArchivoConRotacion(string contenido)
     {
         try
         {
+            FileInfo fileInfo = new FileInfo(LogFilePath);
+            // Rotación básica: si supera el límite de 1MB, se sobrescribe para evitar saturación de disco (DoS)
+            if (fileInfo.Exists && fileInfo.Length > MaxLogFileSizeBytes)
+            {
+                File.WriteAllText(LogFilePath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] --- LOG ROTADO POR TAMAÑO LÍMITE ---" + Environment.NewLine);
+            }
+
             File.AppendAllText(LogFilePath, contenido + Environment.NewLine);
         }
         catch (Exception ex)

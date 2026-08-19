@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace VenterinaryClinicSystem.Models;
 
 public class Trabajador : Persona
@@ -12,8 +15,8 @@ public class Trabajador : Persona
         Especialidad = especialidad;
     }
 
-    public override void MostrarInformacion()
+    public override string ObtenerInformacion()
     {
-        Console.WriteLine($"[TRABAJADOR] {Nombre} | Cargo: {Cargo} | Especialidad: {Especialidad} | Teléfono: {Telefono}");
+        return $"[TRABAJADOR] ID: {Id} | Nombre: {Nombre} | Edad: {Edad} | Teléfono: {Telefono} | Cargo: {Cargo} | Especialidad: {Especialidad}";
     }
 }

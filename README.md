@@ -5,20 +5,39 @@ Sistema de gestión de clínicas veterinarias desarrollado con C# y .NET.
 
 ```mermaid
 classDiagram
-    class IRegistrable {
+    class IClienteRepository {
         <<interface>>
-        +Registrar() void
-        +MostrarInformacion() void
+        +Agregar(Patient cliente) void
+        +AgregarAsync(Patient cliente) Task
+        +ObtenerTodos() IReadOnlyList~Patient~
+        +ObtenerPorNombre(string nombre) Patient
     }
 
-    class INotificable {
+    class IMascotaRepository {
         <<interface>>
-        +EnviarNotificacion(string mensaje) void
+        +Agregar(Pet mascota, Guid clienteId) void
+        +ObtenerPorClienteId(Guid clienteId) IReadOnlyList~Pet~
     }
 
-    class IAtendible {
+    class ClienteRepository {
+        -ConcurrentDictionary~Guid, Patient~ _clientesPorId
+        +Agregar(Patient cliente) void
+    }
+
+    class MascotaRepository {
+        -ConcurrentDictionary~Guid, Tuple~ _mascotasPorId
+        +Agregar(Pet mascota, Guid clienteId) void
+    }
+
+    class IPatientService {
         <<interface>>
-        +Atender(Patient paciente, Pet mascota) void
+        +RegistrarPaciente(string nombre, int edad, string sintoma) Patient
+        +RegistrarPacienteAsync(string nombre, int edad, string sintoma) Task~Patient~
+    }
+
+    class PatientService {
+        -IClienteRepository _clienteRepository
+        -IMascotaRepository _mascotaRepository
     }
 
     class Persona {
@@ -26,70 +45,33 @@ classDiagram
         +Guid Id
         +string Nombre
         +int Edad
-        -string _telefono
         +string Telefono
-        +Registrar() void
-        +MostrarInformacion()* void
     }
 
     class Animal {
         <<abstract>>
-        +int Id
+        +Guid Id
         +string Nombre
-        +int EdadEnMeses
         +string Especie
-        +EmitirSonido() string
-        +Registrar() void
-        +MostrarInformacion()* void
+        +EmitirSonido()* string
     }
 
     class Patient {
         +string Sintoma
-        +List~Pet~ Mascotas
-        +MostrarInformacion() void
-        +EnviarNotificacion(string mensaje) void
-    }
-
-    class Trabajador {
-        +string Cargo
-        +string Especialidad
-        +MostrarInformacion() void
+        +IReadOnlyCollection~Pet~ Mascotas
     }
 
     class Pet {
         +double Peso
-        +string Sintoma
         +string Raza
         +EmitirSonido() string
-        +MostrarInformacion() void
     }
 
-    class ServicioVeterinario {
-        <<abstract>>
-        +string NombreServicio
-        +decimal Costo
-        +Trabajador AtendidoPor
-        +Atender(Patient paciente, Pet mascota)* void
-    }
-
-    class ConsultaGeneral {
-        +Atender(Patient paciente, Pet mascota) void
-    }
-
-    class Vacunacion {
-        +string TipoVacuna
-        +Atender(Patient paciente, Pet mascota) void
-    }
-
-    IRegistrable <|.. Persona
-    IRegistrable <|.. Animal
-    INotificable <|.. Patient
-    IAtendible <|.. ServicioVeterinario
+    IClienteRepository <|.. ClienteRepository
+    IMascotaRepository <|.. MascotaRepository
+    IPatientService <|.. PatientService
+    PatientService --> IClienteRepository : Inyección de Dependencias
+    PatientService --> IMascotaRepository : Inyección de Dependencias
     Persona <|-- Patient
-    Persona <|-- Trabajador
     Animal <|-- Pet
-    Patient "1" --> "*" Pet : posee
-    ServicioVeterinario <|-- ConsultaGeneral
-    ServicioVeterinario <|-- Vacunacion
-    ServicioVeterinario --> Trabajador : asignado a
 ```

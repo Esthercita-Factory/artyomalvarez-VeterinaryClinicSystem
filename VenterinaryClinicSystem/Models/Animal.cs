@@ -1,5 +1,10 @@
+using System;
+
 namespace VenterinaryClinicSystem.Models;
 
+/// <summary>
+/// Clase abstracta Animal (Capa de Dominio).
+/// </summary>
 public abstract class Animal : IRegistrable
 {
     public Guid Id { get; set; }
@@ -15,7 +20,6 @@ public abstract class Animal : IRegistrable
         Especie = especie;
     }
 
-    // Polimorfismo: método virtual para que las subclases lo sobrescriban (override)
     public virtual string EmitirSonido()
     {
         return "El animal hace un sonido indeterminado.";
@@ -23,8 +27,8 @@ public abstract class Animal : IRegistrable
 
     public virtual void Registrar()
     {
-        Console.WriteLine($"Registrando al animal: {Nombre} ({Especie})");
+        // Operación de negocio al registrar animal
     }
 
-    public abstract void MostrarInformacion();
+    public abstract string ObtenerInformacion();
 }

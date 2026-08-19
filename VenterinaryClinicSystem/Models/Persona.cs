@@ -1,12 +1,16 @@
+using System;
+
 namespace VenterinaryClinicSystem.Models;
 
+/// <summary>
+/// Clase abstracta Persona (Capa de Dominio).
+/// </summary>
 public abstract class Persona : IRegistrable
 {
     public Guid Id { get; set; }
     public string Nombre { get; set; }
     public int Edad { get; set; }
     
-    // Encapsulación de dato sensible: Teléfono
     private string _telefono = string.Empty;
     public string Telefono 
     { 
@@ -24,8 +28,8 @@ public abstract class Persona : IRegistrable
 
     public virtual void Registrar()
     {
-        Console.WriteLine($"Registrando a la persona: {Nombre}");
+        // Operación de negocio al registrar persona (estado)
     }
 
-    public abstract void MostrarInformacion();
+    public abstract string ObtenerInformacion();
 }

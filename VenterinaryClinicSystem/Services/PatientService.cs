@@ -1,422 +1,226 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using VenterinaryClinicSystem.Exceptions;
 using VenterinaryClinicSystem.Models;
+using VenterinaryClinicSystem.Repository;
 
 namespace VenterinaryClinicSystem.Services;
 
-public class PatientService
+/// <summary>
+/// Capa SERVICES (Cerebro / Lógica de Negocio):
+/// Recibe IClienteRepository e IMascotaRepository por Inyección de Dependencias (Constructor Injection).
+/// </summary>
+public class PatientService : IPatientService
 {
-    // TASK 1: Lista para almacenar pacientes
-    private List<Patient> _pacientes = new List<Patient>();
+    private readonly IClienteRepository _clienteRepository;
+    private readonly IMascotaRepository _mascotaRepository;
 
-    // TASK 1: Diccionario para asociar el ID (Guid) del paciente con su información (Acceso rápido por ID)
-    private Dictionary<Guid, Patient> _pacientesPorId = new Dictionary<Guid, Patient>();
-
-    public PatientService()
+    // Inyección de Dependencias a través del constructor
+    public PatientService(IClienteRepository clienteRepository, IMascotaRepository mascotaRepository)
     {
-        // Cargar datos iniciales de prueba para probar LINQ fácilmente
+        _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
+        _mascotaRepository = mascotaRepository ?? throw new ArgumentNullException(nameof(mascotaRepository));
         CargarDatosIniciales();
     }
 
     private void CargarDatosIniciales()
     {
         var p1 = new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo de rutina");
-        p1.Mascotas.Add(new Pet(Guid.NewGuid(), "Firulais", 24, 12.5, "Vacunación", "Perro"));
-        p1.Mascotas.Add(new Pet(Guid.NewGuid(), "Michi", 12, 4.0, "Fiebre", "Gato"));
+        var m1 = new Pet(Guid.NewGuid(), "Firulais", 24, 12.5, "Vacunación", "Perro", "Labrador");
+        var m2 = new Pet(Guid.NewGuid(), "Michi", 12, 4.0, "Fiebre", "Gato", "Siames");
+        p1.AgregarMascota(m1);
+        p1.AgregarMascota(m2);
 
         var p2 = new Patient(Guid.NewGuid(), "Ana Gómez", 28, "Consulta general");
-        p2.Mascotas.Add(new Pet(Guid.NewGuid(), "Rex", 36, 20.0, "Cojera", "Perro"));
+        var m3 = new Pet(Guid.NewGuid(), "Rex", 36, 20.0, "Cojera", "Perro", "Pastor Alemán");
+        p2.AgregarMascota(m3);
 
         var p3 = new Patient(Guid.NewGuid(), "Beatriz López", 42, "Control de peso");
-        p3.Mascotas.Add(new Pet(Guid.NewGuid(), "Garfield", 48, 6.5, "Sobrepeso", "Gato"));
+        var m4 = new Pet(Guid.NewGuid(), "Garfield", 48, 6.5, "Sobrepeso", "Gato", "Persa");
+        p3.AgregarMascota(m4);
 
-        // Agregar a la lista
-        _pacientes.Add(p1);
-        _pacientes.Add(p2);
-        _pacientes.Add(p3);
+        _clienteRepository.Agregar(p1);
+        _mascotaRepository.Agregar(m1, p1.Id);
+        _mascotaRepository.Agregar(m2, p1.Id);
 
-        // Agregar al diccionario (Clave: Id Guid, Valor: Objeto Paciente)
-        _pacientesPorId[p1.Id] = p1;
-        _pacientesPorId[p2.Id] = p2;
-        _pacientesPorId[p3.Id] = p3;
+        _clienteRepository.Agregar(p2);
+        _mascotaRepository.Agregar(m3, p2.Id);
+
+        _clienteRepository.Agregar(p3);
+        _mascotaRepository.Agregar(m4, p3.Id);
     }
 
-    // TASK 1: Registrar paciente y agregar a las colecciones (List y Dictionary)
-    public void RegistrarPaciente()
+    public IReadOnlyList<Patient> ObtenerTodosLosPacientes()
     {
-        Console.Write("Ingrese el nombre: ");
-        string nombre = Console.ReadLine()!;
-        while (string.IsNullOrWhiteSpace(nombre) || !nombre.Any(char.IsLetter))
-        {
-            Console.Write("Nombre inválido. Ingrese nuevamente: ");
-            nombre = Console.ReadLine()!;
-        }
-
-        Console.Write("Ingrese la edad: ");
-        int edad;
-        while (!int.TryParse(Console.ReadLine(), out edad) || edad <= 0)
-        {
-            Console.Write("Edad inválida. Ingrese un número mayor a 0: ");
-        }
-
-        Console.Write("Ingrese los síntomas: ");
-        string sintoma = Console.ReadLine()!;
-
-        // Generar un Guid único automáticamente
-        Patient nuevoPaciente = new Patient(Guid.NewGuid(), nombre, edad, sintoma);
-
-        // Agregar a la Lista y al Diccionario
-        _pacientes.Add(nuevoPaciente);
-        _pacientesPorId[nuevoPaciente.Id] = nuevoPaciente;
-
-        Console.WriteLine($"\n¡Paciente registrado con éxito! (ID Asignado: {nuevoPaciente.Id})");
+        return _clienteRepository.ObtenerTodos();
     }
 
-    // TASK 1: Modificar y Eliminar elementos en colecciones
-    public void ModificarPaciente(Guid id, string nuevoNombre)
+    public Patient RegistrarPaciente(string? nombre, int edad, string? sintoma, string? telefono = "000-000-0000")
     {
-        // Acceso directo y rápido usando el Diccionario con Guid
-        if (_pacientesPorId.TryGetValue(id, out Patient? paciente) && paciente != null)
+        if (string.IsNullOrWhiteSpace(nombre))
         {
-            paciente.Nombre = nuevoNombre;
-            Console.WriteLine($"Paciente con ID {id} modificado correctamente.");
+            throw new ArgumentException("El nombre del paciente no puede estar vacío o ser nulo.");
         }
-        else
+
+        if (edad <= 0)
         {
-            Console.WriteLine($"No se encontró paciente con ID {id}.");
+            throw new ArgumentOutOfRangeException(nameof(edad), "La edad debe ser un número positivo.");
         }
+
+        string sintomaLimpio = string.IsNullOrWhiteSpace(sintoma) ? "Sin síntoma especificado" : sintoma.Trim();
+        string telefonoLimpio = string.IsNullOrWhiteSpace(telefono) ? "000-000-0000" : telefono.Trim();
+
+        var nuevoPaciente = new Patient(Guid.NewGuid(), nombre.Trim(), edad, sintomaLimpio, telefonoLimpio);
+        _clienteRepository.Agregar(nuevoPaciente);
+        LoggerService.LogInfo($"[SÍNCRONO] Cliente '{nuevoPaciente.Nombre}' registrado en IClienteRepository con ID {nuevoPaciente.Id}");
+        return nuevoPaciente;
     }
 
-    public void EliminarPaciente(Guid id)
+    public async Task<Patient> RegistrarPacienteAsync(string? nombre, int edad, string? sintoma, string? telefono = "000-000-0000")
     {
-        if (_pacientesPorId.TryGetValue(id, out Patient? paciente) && paciente != null)
+        if (string.IsNullOrWhiteSpace(nombre))
         {
-            // Eliminar de ambas colecciones
-            _pacientes.Remove(paciente);
-            _pacientesPorId.Remove(id);
-            Console.WriteLine($"Paciente con ID {id} eliminado correctamente.");
+            throw new ArgumentException("El nombre del paciente no puede estar vacío o ser nulo.");
         }
+
+        if (edad <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(edad), "La edad debe ser un número positivo.");
+        }
+
+        string sintomaLimpio = string.IsNullOrWhiteSpace(sintoma) ? "Sin síntoma especificado" : sintoma.Trim();
+        string telefonoLimpio = string.IsNullOrWhiteSpace(telefono) ? "000-000-0000" : telefono.Trim();
+
+        var nuevoPaciente = new Patient(Guid.NewGuid(), nombre.Trim(), edad, sintomaLimpio, telefonoLimpio);
+
+        await _clienteRepository.AgregarAsync(nuevoPaciente);
+        LoggerService.LogInfo($"[ASÍNCRONO] Cliente '{nuevoPaciente.Nombre}' registrado exitosamente con ID {nuevoPaciente.Id}");
+        return nuevoPaciente;
     }
 
-    // TASK 2: Practicar diferencias entre Sintaxis de Consulta y Sintaxis de Métodos en LINQ
-    public void DemostrarSintaxisLinq()
+    public Patient? BuscarPorNombre(string nombre)
     {
-        Console.WriteLine("\n=== TASK 2: EJEMPLOS DE LINQ ===");
-
-        // 1. Where: Filtrar pacientes por edad
-        Console.WriteLine("\n1. Filtrar pacientes con edad mayor a 30:");
-        
-        // Sintaxis de Métodos (Expresiones Lambda):
-        var mayoresMetodo = _pacientes.Where(p => p.Edad > 30);
-        
-        // Sintaxis de Consulta (Parecida a SQL):
-        var mayoresConsulta = from p in _pacientes
-                              where p.Edad > 30
-                              select p;
-
-        foreach (var p in mayoresMetodo)
-        {
-            Console.WriteLine($"- {p.Nombre} ({p.Edad} años)");
-        }
-
-        // 2. Select: Proyectar solo los nombres de los pacientes
-        Console.WriteLine("\n2. Proyectar solo nombres de pacientes (Select):");
-        var soloNombres = _pacientes.Select(p => p.Nombre);
-        foreach (var nombre in soloNombres)
-        {
-            Console.WriteLine($"- {nombre}");
-        }
-
-        // 3. OrderBy / OrderByDescending: Ordenar por Nombre o Edad
-        Console.WriteLine("\n3. Pacientes ordenados por edad:");
-        var ordenadosAsc = _pacientes.OrderBy(p => p.Edad);
-        var ordenadosDesc = _pacientes.OrderByDescending(p => p.Edad);
-
-        Console.WriteLine("  Ascendente:");
-        foreach (var p in ordenadosAsc) Console.WriteLine($"    {p.Nombre}: {p.Edad} años");
-
-        Console.WriteLine("  Descendente:");
-        foreach (var p in ordenadosDesc) Console.WriteLine($"    {p.Nombre}: {p.Edad} años");
-
-        // 4. GroupBy: Agrupar mascotas por especie
-        Console.WriteLine("\n4. Mascotas agrupadas por especie (GroupBy):");
-        var todasLasMascotas = _pacientes.SelectMany(p => p.Mascotas);
-        var agrupadasPorEspecie = todasLasMascotas.GroupBy(m => m.Especie);
-
-        foreach (var grupo in agrupadasPorEspecie)
-        {
-            Console.WriteLine($"  Especie: {grupo.Key}");
-            foreach (var mascota in grupo)
-            {
-                Console.WriteLine($"    - {mascota.Nombre}");
-            }
-        }
-
-        // 5. Métodos concretos: First, FirstOrDefault, Any, All, Count
-        Console.WriteLine("\n5. Métodos concretos de LINQ:");
-        
-        // Count: Total de pacientes
-        int totalPacientes = _pacientes.Count();
-        Console.WriteLine($"  Total de pacientes (Count): {totalPacientes}");
-
-        // FirstOrDefault: Buscar primer paciente llamado 'Ana Gómez' o devolver null si no existe
-        var ana = _pacientes.FirstOrDefault(p => p.Nombre == "Ana Gómez");
-        Console.WriteLine($"  Búsqueda con FirstOrDefault: {(ana != null ? ana.Nombre : "No encontrado")}");
-
-        // Any: Verificar si existe al menos un paciente mayor de 40 años
-        bool hayMayoresDe40 = _pacientes.Any(p => p.Edad > 40);
-        Console.WriteLine($"  ¿Hay algún paciente mayor de 40 años? (Any): {hayMayoresDe40}");
-
-        // All: Verificar si todos los pacientes tienen al menos 18 años
-        bool todosMayoresDeEdad = _pacientes.All(p => p.Edad >= 18);
-        Console.WriteLine($"  ¿Todos los pacientes son mayores de edad? (All): {todosMayoresDeEdad}");
+        if (string.IsNullOrWhiteSpace(nombre)) return null;
+        return _clienteRepository.ObtenerPorNombre(nombre);
     }
 
-    public void ListarPacientes()
-    {
-        if (_pacientes.Count == 0)
-        {
-            Console.WriteLine("\nNo hay pacientes registrados.");
-            return;
-        }
-
-        foreach (var patient in _pacientes)
-        {
-            Console.WriteLine($"\n[ID: {patient.Id}] Nombre: {patient.Nombre} | Edad: {patient.Edad} | Síntoma: {patient.Sintoma}");
-            if (patient.Mascotas.Any())
-            {
-                Console.WriteLine("  Mascotas:");
-                foreach (var m in patient.Mascotas)
-                {
-                    Console.WriteLine($"    - {m.Nombre} ({m.Especie}, {m.EdadEnMeses} meses)");
-                }
-            }
-        }
-    }
-
-    public void BuscarPaciente()
-    {
-        Console.Write("Ingrese el nombre del paciente a buscar: ");
-        string nombre = Console.ReadLine()!;
-
-        // Uso de LINQ FirstOrDefault en sustitución del foreach manual
-        var paciente = _pacientes.FirstOrDefault(p => p.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase));
-
-        if (paciente != null)
-        {
-            Console.WriteLine($"\n[ID: {paciente.Id}] Nombre: {paciente.Nombre} | Edad: {paciente.Edad} | Síntomas: {paciente.Sintoma}");
-        }
-        else
-        {
-            Console.WriteLine("Paciente no encontrado.");
-        }
-    }
-
-    // TASK 4: Encadenar consultas LINQ (Filtro + Ordenamiento + Proyección)
-    public void DemostrarConsultasEncadenadas()
-    {
-        Console.WriteLine("\n=== TASK 4: CONSULTAS LINQ ENCADENADAS ===");
-        Console.WriteLine("Ejemplo: Pacientes con mascotas 'Perro', ordenados por edad del paciente, mostrando solo Nombre y Mascota.");
-
-        // Encadenamos: Where (filtro) -> OrderBy (orden) -> Select (proyección objeto anónimo)
-        var resultadoEncadenado = _pacientes
-            .Where(p => p.Mascotas.Any(m => m.Especie.Equals("Perro", StringComparison.OrdinalIgnoreCase)))
-            .OrderBy(p => p.Edad)
-            .Select(p => new 
-            {
-                NombreDueño = p.Nombre,
-                EdadDueño = p.Edad,
-                Perros = p.Mascotas.Where(m => m.Especie.Equals("Perro", StringComparison.OrdinalIgnoreCase)).Select(m => m.Nombre)
-            });
-
-        foreach (var item in resultadoEncadenado)
-        {
-            string nombresPerros = string.Join(", ", item.Perros);
-            Console.WriteLine($"- Dueño: {item.NombreDueño} ({item.EdadDueño} años) | Perro(s): {nombresPerros}");
-        }
-    }
-
-    // TASK 5: Resolver problemas prácticos con LINQ
-    public void DemostrarProblemasPracticos()
-    {
-        Console.WriteLine("\n=== TASK 5: PROBLEMAS PRÁCTICOS CON LINQ ===");
-
-        // 1. Paciente más joven y paciente de mayor edad
-        var pacienteMasJoven = _pacientes.OrderBy(p => p.Edad).FirstOrDefault();
-        var pacienteMayorEdad = _pacientes.OrderByDescending(p => p.Edad).FirstOrDefault();
-
-        Console.WriteLine("\n1. Extremos de edad:");
-        if (pacienteMasJoven != null)
-            Console.WriteLine($"   Paciente más joven: {pacienteMasJoven.Nombre} ({pacienteMasJoven.Edad} años)");
-        if (pacienteMayorEdad != null)
-            Console.WriteLine($"   Paciente de mayor edad: {pacienteMayorEdad.Nombre} ({pacienteMayorEdad.Edad} años)");
-
-        // 2. Contar cuántas mascotas hay de cada especie
-        Console.WriteLine("\n2. Conteo de mascotas por especie:");
-        var conteoPorEspecie = _pacientes
-            .SelectMany(p => p.Mascotas) // Aplana las listas de mascotas de todos los pacientes en una sola lista
-            .GroupBy(m => m.Especie)
-            .Select(g => new { Especie = g.Key, Total = g.Count() });
-
-        foreach (var grupo in conteoPorEspecie)
-        {
-            Console.WriteLine($"   Especie '{grupo.Especie}': {grupo.Total} mascota(s)");
-        }
-
-        // 3. Verificar si existe al menos un paciente con determinada condición
-        // Ejemplo: Mascota con síntoma 'Fiebre'
-        bool existeMascotaConFiebre = _pacientes
-            .SelectMany(p => p.Mascotas)
-            .Any(m => m.Sintoma.Equals("Fiebre", StringComparison.OrdinalIgnoreCase));
-
-        Console.WriteLine($"\n3. ¿Existe al menos una mascota con síntoma 'Fiebre'?: {existeMascotaConFiebre}");
-
-        // 4. Listar nombres de pacientes en MAYÚSCULAS ordenados alfabéticamente
-        Console.WriteLine("\n4. Nombres de pacientes en MAYÚSCULAS y ordenados:");
-        var nombresMayusculas = _pacientes
-            .Select(p => p.Nombre.ToUpper())
-            .OrderBy(n => n);
-
-        foreach (var nombre in nombresMayusculas)
-        {
-            Console.WriteLine($"   - {nombre}");
-        }
-    }
-
-    // HISTORIA M5.3S3: Demostrar Herencia, Polimorfismo, Abstracción e Interfaces
-    public void DemostrarPooHerenciaYPolimorfismo()
-    {
-        Console.WriteLine("\n=== HISTORIA M5.3S3: DEMOSTRACIÓN POO Y HERENCIA ===");
-
-        // 1. Instanciación y Herencia (Persona -> Trabajador / Patient, Animal -> Pet)
-        Trabajador drVet = new Trabajador(Guid.NewGuid(), "Dra. Laura Martínez", 38, "555-1234", "Veterinaria Principal", "Cirugía y Medicina General");
-        
-        Patient pacientePrueba = _pacientes.FirstOrDefault() ?? new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo", "555-9876");
-        Pet mascotaPrueba = pacientePrueba.Mascotas.FirstOrDefault() ?? new Pet(Guid.NewGuid(), "Firulais", 24, 12.5, "Vacunación", "Perro", "Labrador");
-
-        Console.WriteLine("\n1. Demostración de Información (Clases e Interfaces IRegistrable):");
-        drVet.MostrarInformacion();
-        pacientePrueba.MostrarInformacion();
-        mascotaPrueba.MostrarInformacion();
-
-        // 2. Demostración de Polimorfismo con EmitirSonido()
-        Console.WriteLine("\n2. Demostración de Polimorfismo (Animal.EmitirSonido):");
-        foreach (var paciente in _pacientes)
-        {
-            foreach (var m in paciente.Mascotas)
-            {
-                Console.WriteLine($"   - La mascota {m.Nombre} ({m.Especie}) emite el sonido: {m.EmitirSonido()}");
-            }
-        }
-
-        // 3. Demostración de Abstracción con Clase Abstracta ServicioVeterinario y Atender()
-        Console.WriteLine("\n3. Demostración de Servicios Veterinarios (Abstracción con ServicioVeterinario):");
-        ServicioVeterinario consulta = new ConsultaGeneral(drVet);
-        ServicioVeterinario vacunacion = new Vacunacion(drVet, "Triple Felina / Antirrábica");
-
-        // Polimorfismo: Llamada al mismo método Atender() desde diferentes subclases de ServicioVeterinario
-        consulta.Atender(pacientePrueba, mascotaPrueba);
-        
-        var michi = pacientePrueba.Mascotas.FirstOrDefault(m => m.Especie.Equals("Gato", StringComparison.OrdinalIgnoreCase));
-        if (michi != null)
-        {
-            vacunacion.Atender(pacientePrueba, michi);
-        }
-    }
-
-    // ==========================================
-    // M5.3S4: INTERFACES, EXCEPCIONES Y LOGGING
-    // ==========================================
-
-    // TASK 2 y 3: Múltiples Interfaces (IRegistrable, INotificable, IAtendible)
-    public void DemostrarInterfacesYNotificaciones()
-    {
-        Console.WriteLine("\n=== TASK 2 Y 3: DEMOSTRACIÓN DE MÚLTIPLES INTERFACES ===");
-
-        Patient paciente = _pacientes.FirstOrDefault() ?? new Patient(Guid.NewGuid(), "Laura Gómez", 30, "Consulta de rutina");
-
-        // 1. Demostrar IRegistrable
-        IRegistrable registrable = paciente;
-        registrable.Registrar();
-        registrable.MostrarInformacion();
-
-        // 2. Demostrar INotificable
-        INotificable notificable = paciente;
-        notificable.EnviarNotificacion("Recordatorio: Su mascota tiene cita mañana a las 10:00 AM.");
-
-        // 3. Demostrar IAtendible en Servicios Veterinarios
-        Trabajador vet = new Trabajador(Guid.NewGuid(), "Dr. Roberto", 45, "555-4321", "Veterinario", "General");
-        IAtendible servicioAtencion = new ConsultaGeneral(vet);
-        
-        Pet mascotaPrueba = paciente.Mascotas.FirstOrDefault() ?? new Pet(Guid.NewGuid(), "Fifi", 12, 3.5, "Chequeo", "Perro");
-        servicioAtencion.Atender(paciente, mascotaPrueba);
-
-        LoggerService.LogInfo("Demostración de interfaces múltiples ejecutada exitosamente.");
-    }
-
-    // TASK 5: Búsqueda con Excepciones Personalizadas (MascotaNoEncontradaException, PacienteNoEncontradoException)
     public Pet BuscarMascotaDePaciente(string nombrePaciente, string nombreMascota)
     {
-        var paciente = _pacientes.FirstOrDefault(p => p.Nombre.Equals(nombrePaciente, StringComparison.OrdinalIgnoreCase));
+        var paciente = BuscarPorNombre(nombrePaciente);
         if (paciente == null)
         {
-            throw new Exceptions.PacienteNoEncontradoException($"No se encontró al paciente '{nombrePaciente}'.");
+            throw new PacienteNoEncontradoException($"No se encontró al paciente '{nombrePaciente}'.");
         }
 
-        var mascota = paciente.Mascotas.FirstOrDefault(m => m.Nombre.Equals(nombreMascota, StringComparison.OrdinalIgnoreCase));
+        var mascota = _mascotaRepository.ObtenerPorClienteId(paciente.Id)
+            .FirstOrDefault(m => m.Nombre.Equals(nombreMascota, StringComparison.OrdinalIgnoreCase));
+
         if (mascota == null)
         {
-            throw new Exceptions.MascotaNoEncontradaException(nombreMascota, nombrePaciente);
+            throw new MascotaNoEncontradaException(nombreMascota, nombrePaciente);
         }
 
         return mascota;
     }
 
-    // TASK 4, 5 y 6: Manejo Estructurado de Excepciones, Depuración y Logging
-    public void DemostrarManejoExcepcionesYLogging()
+    public bool ModificarNombrePaciente(Guid id, string nuevoNombre)
     {
-        Console.WriteLine("\n=== TASK 4, 5 Y 6: MANEJO DE EXCEPCIONES, LOGGING Y DEPURACIÓN ===");
+        var paciente = _clienteRepository.ObtenerPorId(id);
+        if (paciente != null)
+        {
+            paciente.Nombre = nuevoNombre;
+            return _clienteRepository.Actualizar(paciente);
+        }
+        return false;
+    }
 
-        // Escenario 1: Captura de Excepción Personalizada
-        Console.WriteLine("\n[Escenario 1] Buscando mascota inexistente para probar excepción personalizada:");
-        try
+    public bool EliminarPaciente(Guid id)
+    {
+        return _clienteRepository.Eliminar(id);
+    }
+
+    public IEnumerable<Patient> ObtenerPacientesMayoresDe(int edad)
+    {
+        return _clienteRepository.ObtenerTodos().Where(p => p.Edad > edad);
+    }
+
+    public IEnumerable<string> ObtenerSoloNombres()
+    {
+        return _clienteRepository.ObtenerTodos().Select(p => p.Nombre);
+    }
+
+    public IEnumerable<Patient> ObtenerPacientesOrdenadosPorEdad(bool ascendente = true)
+    {
+        var pacientes = _clienteRepository.ObtenerTodos();
+        return ascendente ? pacientes.OrderBy(p => p.Edad) : pacientes.OrderByDescending(p => p.Edad);
+    }
+
+    public IEnumerable<IGrouping<string, Pet>> ObtenerMascotasAgrupadasPorEspecie()
+    {
+        return _mascotaRepository.ObtenerTodas()
+            .GroupBy(m => m.Especie);
+    }
+
+    public async Task SimularProcesosParalelosClinicaAsync(string nombrePaciente)
+    {
+        LoggerService.LogInfo($"Iniciando procesos paralelos para cliente '{nombrePaciente}'...");
+
+        Task<string> tareaHistorial = Task.Run(async () =>
         {
-            // Intentar buscar una mascota que no existe
-            BuscarMascotaDePaciente("Carlos Pérez", "MascotaInexistente");
+            await Task.Delay(1500);
+            return "Historial médico cargado desde el repositorio.";
+        });
+
+        Task<string> tareaCita = Task.Run(async () =>
+        {
+            await Task.Delay(800);
+            return "Cita agendada en el sistema.";
+        });
+
+        Task<string> tareaNotificacion = Task.Run(async () =>
+        {
+            await Task.Delay(2000);
+            return "Notificación enviada al cliente.";
+        });
+
+        Task<string> primeraFinalizada = await Task.WhenAny(tareaHistorial, tareaCita, tareaNotificacion);
+        string resultadoPrimera = await primeraFinalizada;
+        LoggerService.LogInfo($"[Task.WhenAny] Primera tarea completada: {resultadoPrimera}");
+
+        string[] todosLosResultados = await Task.WhenAll(tareaHistorial, tareaCita, tareaNotificacion);
+        LoggerService.LogInfo("[Task.WhenAll] Todas las tareas del proceso han finalizado:");
+        foreach (var res in todosLosResultados)
+        {
+            LoggerService.LogInfo($"  - {res}");
         }
-        catch (Exceptions.MascotaNoEncontradaException ex)
+    }
+
+    public async Task SimularAtencionConcurrentesMascotasAsync()
+    {
+        LoggerService.LogInfo("Simulando atención médica simultánea para mascotas guardadas en IMascotaRepository...");
+
+        var mascotas = _mascotaRepository.ObtenerTodas();
+        if (!mascotas.Any())
         {
-            LoggerService.LogError("Error de dominio capturado (MascotaNoEncontradaException)", ex);
-            Console.WriteLine($"-> Mensaje controlado para usuario: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            LoggerService.LogError("Error inesperado en búsqueda de mascota", ex);
-        }
-        finally
-        {
-            Console.WriteLine("[Bloque Finally] Operación de búsqueda de mascota finalizada.");
+            LoggerService.LogWarning("No hay mascotas registradas para atender.");
+            return;
         }
 
-        // Escenario 2: Captura y Depuración de Error Forzado (División entre Cero)
-        Console.WriteLine("\n[Escenario 2] Ejecución y depuración de error forzado (División entre cero):");
-        try
+        List<Task<string>> tareasAtencion = mascotas.Select(m => Task.Run(async () =>
         {
-            int totalMascotas = 0; // Provocará la división entre cero al calcular promedio
-            int totalPacientes = 10;
-            
-            // BREAKPOINT RECOMENDADO AQUÍ para depurar paso a paso en el IDE
-            int promedio = totalPacientes / totalMascotas;
-        }
-        catch (DivideByZeroException ex)
+            LoggerService.LogInfo($"  -> Atendiendo a {m.Nombre} ({m.Especie})...");
+            await Task.Delay(1000);
+            return $"Atención de {m.Nombre} finalizada.";
+        })).ToList();
+
+        string[] resultadosAtencion = await Task.WhenAll(tareasAtencion);
+
+        LoggerService.LogInfo("Resumen de atención simultánea de mascotas:");
+        foreach (var item in resultadosAtencion)
         {
-            LoggerService.LogError("Se identificó y capturó un error aritmético (División entre cero)", ex);
-            Console.WriteLine("-> Manejo de error: No se puede calcular el promedio cuando el divisor es cero.");
-        }
-        finally
-        {
-            Console.WriteLine("[Bloque Finally] Proceso de cálculo depurado y seguro.");
+            LoggerService.LogInfo($"  ✓ {item}");
         }
     }
 }
