@@ -11,6 +11,16 @@ classDiagram
         +MostrarInformacion() void
     }
 
+    class INotificable {
+        <<interface>>
+        +EnviarNotificacion(string mensaje) void
+    }
+
+    class IAtendible {
+        <<interface>>
+        +Atender(Patient paciente, Pet mascota) void
+    }
+
     class Persona {
         <<abstract>>
         +Guid Id
@@ -37,6 +47,7 @@ classDiagram
         +string Sintoma
         +List~Pet~ Mascotas
         +MostrarInformacion() void
+        +EnviarNotificacion(string mensaje) void
     }
 
     class Trabajador {
@@ -72,6 +83,8 @@ classDiagram
 
     IRegistrable <|.. Persona
     IRegistrable <|.. Animal
+    INotificable <|.. Patient
+    IAtendible <|.. ServicioVeterinario
     Persona <|-- Patient
     Persona <|-- Trabajador
     Animal <|-- Pet

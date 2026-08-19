@@ -5,7 +5,7 @@ bool salir = false;
 
 while (!salir)
 {
-    Console.WriteLine("\n--- MENU DE PACIENTES Y LINQ ---");
+    Console.WriteLine("\n--- MENU CLINICA VETERINARIA ---");
     Console.WriteLine("1. Registrar paciente");
     Console.WriteLine("2. Listar pacientes");
     Console.WriteLine("3. Buscar paciente (LINQ FirstOrDefault)");
@@ -13,7 +13,9 @@ while (!salir)
     Console.WriteLine("5. Demostrar consultas LINQ encadenadas (Task 4)");
     Console.WriteLine("6. Demostrar problemas prácticos LINQ (Task 5)");
     Console.WriteLine("7. Demostrar POO: Herencia, Polimorfismo y Servicios (M5.3S3)");
-    Console.WriteLine("8. Salir");
+    Console.WriteLine("8. Demostrar Interfaces y Notificaciones (M5.3S4 - Tasks 1, 2, 3)");
+    Console.WriteLine("9. Demostrar Excepciones, Depuración y Logging (M5.3S4 - Tasks 4, 5, 6)");
+    Console.WriteLine("10. Salir");
     Console.Write("Seleccione una opción: ");
 
     string opcion = Console.ReadLine()!;
@@ -42,6 +44,12 @@ while (!salir)
             patientService.DemostrarPooHerenciaYPolimorfismo();
             break;
         case "8":
+            patientService.DemostrarInterfacesYNotificaciones();
+            break;
+        case "9":
+            patientService.DemostrarManejoExcepcionesYLogging();
+            break;
+        case "10":
             salir = true;
             Console.WriteLine("¡Hasta luego!");
             break;

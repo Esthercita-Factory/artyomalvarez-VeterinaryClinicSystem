@@ -2,8 +2,12 @@ using VenterinaryClinicSystem.Models;
 
 namespace VenterinaryClinicSystem.Services;
 
-// Clase abstracta ServicioVeterinario (Abstracción)
-public abstract class ServicioVeterinario
+/// <summary>
+/// TASK 1 y TASK 2: Justificación e implementación de IAtendible.
+/// - ServicioVeterinario es una clase abstracta porque comparte propiedades del servicio (NombreServicio, Costo, AtendidoPor).
+/// - Implementa la interfaz IAtendible para garantizar que cualquier subclase de servicio pueda ser tratada de forma polimórfica mediante el contrato Atender().
+/// </summary>
+public abstract class ServicioVeterinario : IAtendible
 {
     public string NombreServicio { get; set; }
     public decimal Costo { get; set; }
@@ -16,7 +20,7 @@ public abstract class ServicioVeterinario
         AtendidoPor = atendidoPor;
     }
 
-    // Método abstracto que debe ser implementado por cada subclase (Consulta, Vacunación)
+    // Método abstracto de ServicioVeterinario e implementación del contrato IAtendible
     public abstract void Atender(Patient paciente, Pet mascota);
 }
 
@@ -30,7 +34,7 @@ public class ConsultaGeneral : ServicioVeterinario
 
     public override void Atender(Patient paciente, Pet mascota)
     {
-        Console.WriteLine($"\n--- ATENDIENDO CONSULTA GENERAL ---");
+        Console.WriteLine($"\n--- ATENDIENDO CONSULTA GENERAL (Vía IAtendible) ---");
         Console.WriteLine($"Atendido por: Dr/a. {AtendidoPor.Nombre} ({AtendidoPor.Cargo})");
         Console.WriteLine($"Paciente: {paciente.Nombre} | Mascota: {mascota.Nombre} ({mascota.Especie})");
         Console.WriteLine($"Sonido de la mascota: {mascota.EmitirSonido()}");
@@ -52,7 +56,7 @@ public class Vacunacion : ServicioVeterinario
 
     public override void Atender(Patient paciente, Pet mascota)
     {
-        Console.WriteLine($"\n--- ATENDIENDO SERVICIO DE VACUNACIÓN ---");
+        Console.WriteLine($"\n--- ATENDIENDO SERVICIO DE VACUNACIÓN (Vía IAtendible) ---");
         Console.WriteLine($"Atendido por: {AtendidoPor.Nombre} ({AtendidoPor.Especialidad})");
         Console.WriteLine($"Aplicando vacuna '{TipoVacuna}' a la mascota {mascota.Nombre} del paciente {paciente.Nombre}.");
         Console.WriteLine($"Reacción de {mascota.Nombre}: {mascota.EmitirSonido()}");

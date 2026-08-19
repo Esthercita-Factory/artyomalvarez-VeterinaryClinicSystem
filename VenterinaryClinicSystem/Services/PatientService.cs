@@ -324,4 +324,99 @@ public class PatientService
             vacunacion.Atender(pacientePrueba, michi);
         }
     }
+
+    // ==========================================
+    // M5.3S4: INTERFACES, EXCEPCIONES Y LOGGING
+    // ==========================================
+
+    // TASK 2 y 3: Múltiples Interfaces (IRegistrable, INotificable, IAtendible)
+    public void DemostrarInterfacesYNotificaciones()
+    {
+        Console.WriteLine("\n=== TASK 2 Y 3: DEMOSTRACIÓN DE MÚLTIPLES INTERFACES ===");
+
+        Patient paciente = _pacientes.FirstOrDefault() ?? new Patient(Guid.NewGuid(), "Laura Gómez", 30, "Consulta de rutina");
+
+        // 1. Demostrar IRegistrable
+        IRegistrable registrable = paciente;
+        registrable.Registrar();
+        registrable.MostrarInformacion();
+
+        // 2. Demostrar INotificable
+        INotificable notificable = paciente;
+        notificable.EnviarNotificacion("Recordatorio: Su mascota tiene cita mañana a las 10:00 AM.");
+
+        // 3. Demostrar IAtendible en Servicios Veterinarios
+        Trabajador vet = new Trabajador(Guid.NewGuid(), "Dr. Roberto", 45, "555-4321", "Veterinario", "General");
+        IAtendible servicioAtencion = new ConsultaGeneral(vet);
+        
+        Pet mascotaPrueba = paciente.Mascotas.FirstOrDefault() ?? new Pet(Guid.NewGuid(), "Fifi", 12, 3.5, "Chequeo", "Perro");
+        servicioAtencion.Atender(paciente, mascotaPrueba);
+
+        LoggerService.LogInfo("Demostración de interfaces múltiples ejecutada exitosamente.");
+    }
+
+    // TASK 5: Búsqueda con Excepciones Personalizadas (MascotaNoEncontradaException, PacienteNoEncontradoException)
+    public Pet BuscarMascotaDePaciente(string nombrePaciente, string nombreMascota)
+    {
+        var paciente = _pacientes.FirstOrDefault(p => p.Nombre.Equals(nombrePaciente, StringComparison.OrdinalIgnoreCase));
+        if (paciente == null)
+        {
+            throw new Exceptions.PacienteNoEncontradoException($"No se encontró al paciente '{nombrePaciente}'.");
+        }
+
+        var mascota = paciente.Mascotas.FirstOrDefault(m => m.Nombre.Equals(nombreMascota, StringComparison.OrdinalIgnoreCase));
+        if (mascota == null)
+        {
+            throw new Exceptions.MascotaNoEncontradaException(nombreMascota, nombrePaciente);
+        }
+
+        return mascota;
+    }
+
+    // TASK 4, 5 y 6: Manejo Estructurado de Excepciones, Depuración y Logging
+    public void DemostrarManejoExcepcionesYLogging()
+    {
+        Console.WriteLine("\n=== TASK 4, 5 Y 6: MANEJO DE EXCEPCIONES, LOGGING Y DEPURACIÓN ===");
+
+        // Escenario 1: Captura de Excepción Personalizada
+        Console.WriteLine("\n[Escenario 1] Buscando mascota inexistente para probar excepción personalizada:");
+        try
+        {
+            // Intentar buscar una mascota que no existe
+            BuscarMascotaDePaciente("Carlos Pérez", "MascotaInexistente");
+        }
+        catch (Exceptions.MascotaNoEncontradaException ex)
+        {
+            LoggerService.LogError("Error de dominio capturado (MascotaNoEncontradaException)", ex);
+            Console.WriteLine($"-> Mensaje controlado para usuario: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            LoggerService.LogError("Error inesperado en búsqueda de mascota", ex);
+        }
+        finally
+        {
+            Console.WriteLine("[Bloque Finally] Operación de búsqueda de mascota finalizada.");
+        }
+
+        // Escenario 2: Captura y Depuración de Error Forzado (División entre Cero)
+        Console.WriteLine("\n[Escenario 2] Ejecución y depuración de error forzado (División entre cero):");
+        try
+        {
+            int totalMascotas = 0; // Provocará la división entre cero al calcular promedio
+            int totalPacientes = 10;
+            
+            // BREAKPOINT RECOMENDADO AQUÍ para depurar paso a paso en el IDE
+            int promedio = totalPacientes / totalMascotas;
+        }
+        catch (DivideByZeroException ex)
+        {
+            LoggerService.LogError("Se identificó y capturó un error aritmético (División entre cero)", ex);
+            Console.WriteLine("-> Manejo de error: No se puede calcular el promedio cuando el divisor es cero.");
+        }
+        finally
+        {
+            Console.WriteLine("[Bloque Finally] Proceso de cálculo depurado y seguro.");
+        }
+    }
 }
