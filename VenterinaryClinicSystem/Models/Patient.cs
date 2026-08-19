@@ -7,15 +7,15 @@ public class Patient : Persona, INotificable
 {
     private readonly List<Pet> _mascotas = new List<Pet>();
 
-    public string Sintoma { get; set; }
+    public string MotivoConsulta { get; set; }
     
     // Encapsulación de Colección: Exposición de lectura IReadOnlyCollection
     public IReadOnlyCollection<Pet> Mascotas => _mascotas.AsReadOnly();
 
-    public Patient(Guid id, string nombre, int edad, string sintoma, string telefono = "000-000-0000") 
+    public Patient(Guid id, string nombre, int edad, string motivoConsulta, string telefono = "000-000-0000") 
         : base(id, nombre, edad, telefono)
     {
-        Sintoma = sintoma;
+        MotivoConsulta = motivoConsulta;
     }
 
     public void AgregarMascota(Pet mascota)
@@ -37,7 +37,7 @@ public class Patient : Persona, INotificable
 
     public override string ObtenerInformacion()
     {
-        return $"[PACIENTE] ID: {Id} | Nombre: {Nombre} | Edad: {Edad} | Teléfono: {Telefono} | Síntoma: {Sintoma}";
+        return $"[PACIENTE] ID: {Id} | Nombre: {Nombre} | Edad: {Edad} | Teléfono: {Telefono} | Motivo Consulta: {MotivoConsulta}";
     }
 
     public void EnviarNotificacion(string mensaje)

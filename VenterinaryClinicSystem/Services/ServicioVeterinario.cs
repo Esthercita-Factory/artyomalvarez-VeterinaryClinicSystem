@@ -38,7 +38,7 @@ public class ConsultaGeneral : ServicioVeterinario
         Console.WriteLine($"Atendido por: Dr/a. {AtendidoPor.Nombre} ({AtendidoPor.Cargo})");
         Console.WriteLine($"Paciente: {paciente.Nombre} | Mascota: {mascota.Nombre} ({mascota.Especie})");
         Console.WriteLine($"Sonido de la mascota: {mascota.EmitirSonido()}");
-        Console.WriteLine($"Diagnóstico preliminar basado en síntoma: {mascota.Sintoma}");
+        Console.WriteLine($"Diagnóstico preliminar basado en motivo de consulta: {mascota.MotivoConsulta}");
         Console.WriteLine($"Costo del servicio: ${Costo}");
     }
 }

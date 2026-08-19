@@ -5,14 +5,14 @@ namespace VenterinaryClinicSystem.Models;
 public class Pet : Animal
 {
     public double Peso { get; set; }
-    public string Sintoma { get; set; }
+    public string MotivoConsulta { get; set; }
     public string Raza { get; set; }
 
-    public Pet(Guid id, string nombre, int edadEnMeses, double peso, string sintoma, string especie, string raza = "Sin Raza")
+    public Pet(Guid id, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza")
         : base(id, nombre, edadEnMeses, especie)
     {
         Peso = peso;
-        Sintoma = sintoma;
+        MotivoConsulta = motivoConsulta;
         Raza = raza;
     }
 
@@ -22,6 +22,8 @@ public class Pet : Animal
             return "¡Guau Guau!";
         if (Especie.Equals("Gato", StringComparison.OrdinalIgnoreCase))
             return "¡Miau Miau!";
+        if (Especie.Equals("Canario", StringComparison.OrdinalIgnoreCase) || Especie.Equals("Ave", StringComparison.OrdinalIgnoreCase))
+            return "¡Pío Pío!";
         
         return "¡Sonido animal!";
     }
