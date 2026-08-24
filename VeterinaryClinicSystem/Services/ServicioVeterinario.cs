@@ -1,6 +1,6 @@
-using VenterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Models;
 
-namespace VenterinaryClinicSystem.Services;
+namespace VeterinaryClinicSystem.Services;
 
 /// <summary>
 /// TASK 1 y TASK 2: Justificación e implementación de IAtendible.

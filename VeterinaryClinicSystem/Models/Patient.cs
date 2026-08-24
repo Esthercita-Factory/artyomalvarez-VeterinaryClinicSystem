@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace VenterinaryClinicSystem.Models;
+namespace VeterinaryClinicSystem.Models;
 
 public class Patient : Persona, INotificable
 {

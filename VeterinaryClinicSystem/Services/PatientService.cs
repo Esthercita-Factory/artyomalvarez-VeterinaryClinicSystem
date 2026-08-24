@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VenterinaryClinicSystem.Exceptions;
-using VenterinaryClinicSystem.Models;
-using VenterinaryClinicSystem.Repository;
+using VeterinaryClinicSystem.Exceptions;
+using VeterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Repositories;
 
-namespace VenterinaryClinicSystem.Services;
+namespace VeterinaryClinicSystem.Services;
 
 /// <summary>
 /// Capa SERVICES (Cerebro / Lógica de Negocio):

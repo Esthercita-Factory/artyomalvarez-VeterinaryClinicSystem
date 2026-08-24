@@ -2,10 +2,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using VenterinaryClinicSystem.Models;
-using VenterinaryClinicSystem.Services;
-using VenterinaryClinicSystem.Repository;
-using VenterinaryClinicSystem.Exceptions;
+using VeterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Services;
+using VeterinaryClinicSystem.Repositories;
+using VeterinaryClinicSystem.Exceptions;
 
 namespace VeterinaryClinicSystem.Test;
 

@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using VenterinaryClinicSystem.Exceptions;
-using VenterinaryClinicSystem.Models;
-using VenterinaryClinicSystem.Services;
+using VeterinaryClinicSystem.Exceptions;
+using VeterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Services;
 
-namespace VenterinaryClinicSystem.UI;
+namespace VeterinaryClinicSystem.UI;
 
 /// <summary>
 /// Capa UI (Presentación):
@@ -202,6 +202,12 @@ public class ConsoleUI
             ServicioVeterinario consulta = new ConsultaGeneral(vet);
             consulta.Atender(paciente, paciente.Mascotas.First());
         }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("No hay pacientes con mascotas registradas para demostrar la atención del servicio.");
+            Console.ResetColor();
+        }
     }
 
     private void DemostrarInterfacesYNotificaciones()
@@ -212,6 +218,12 @@ public class ConsoleUI
         {
             INotificable notificable = paciente;
             notificable.EnviarNotificacion("Recordatorio: Su mascota tiene cita programada mañana.");
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("No hay pacientes registrados para enviar notificaciones.");
+            Console.ResetColor();
         }
     }
 

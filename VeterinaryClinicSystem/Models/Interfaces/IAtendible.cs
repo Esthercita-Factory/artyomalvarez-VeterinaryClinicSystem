@@ -1,6 +1,6 @@
-using VenterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Models;
 
-namespace VenterinaryClinicSystem.Models;
+namespace VeterinaryClinicSystem.Models;
 
 /// <summary>
 /// TASK 2: Interfaz IAtendible.

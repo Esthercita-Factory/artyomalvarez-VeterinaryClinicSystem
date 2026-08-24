@@ -1,6 +1,6 @@
-using VenterinaryClinicSystem.Repository;
-using VenterinaryClinicSystem.Services;
-using VenterinaryClinicSystem.UI;
+using VeterinaryClinicSystem.Repositories;
+using VeterinaryClinicSystem.Services;
+using VeterinaryClinicSystem.UI;
 
 // Inicialización con Inyección de Dependencias (Dependency Injection):
 

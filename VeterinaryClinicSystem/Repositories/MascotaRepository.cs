@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VenterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Models;
 
-namespace VenterinaryClinicSystem.Repository;
+namespace VeterinaryClinicSystem.Repositories;
 
 /// <summary>
 /// Implementación concreta de IMascotaRepository.

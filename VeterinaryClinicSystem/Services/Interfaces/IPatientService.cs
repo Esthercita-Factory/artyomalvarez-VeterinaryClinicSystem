@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using VenterinaryClinicSystem.Models;
+using VeterinaryClinicSystem.Models;
 
-namespace VenterinaryClinicSystem.Services;
+namespace VeterinaryClinicSystem.Services;
 
 /// <summary>
 /// Interfaz IPatientService con soporte asíncrono (Historia M5.3S5).

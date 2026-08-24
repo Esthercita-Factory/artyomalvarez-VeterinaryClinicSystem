@@ -1,4 +1,4 @@
-namespace VenterinaryClinicSystem.Models;
+namespace VeterinaryClinicSystem.Models;
 
 /// <summary>
 /// Contrato IRegistrable (Capa de Dominio).

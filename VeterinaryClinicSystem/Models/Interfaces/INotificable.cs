@@ -1,4 +1,4 @@
-namespace VenterinaryClinicSystem.Models;
+namespace VeterinaryClinicSystem.Models;
 
 /// <summary>
 /// TASK 3: Interfaz INotificable.

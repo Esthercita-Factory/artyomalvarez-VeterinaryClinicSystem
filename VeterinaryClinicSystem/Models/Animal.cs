@@ -1,6 +1,6 @@
 using System;
 
-namespace VenterinaryClinicSystem.Models;
+namespace VeterinaryClinicSystem.Models;
 
 /// <summary>
 /// Clase abstracta Animal (Capa de Dominio).

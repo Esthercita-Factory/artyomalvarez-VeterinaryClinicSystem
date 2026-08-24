@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace VenterinaryClinicSystem.Services;
+namespace VeterinaryClinicSystem.Services;
 
 /// <summary>
 /// TASK 6: Sistema de registro de errores (Logging básico con rotación/límite de tamaño).
@@ -10,6 +10,7 @@ public static class LoggerService
 {
     private static readonly string LogFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.log");
     private const long MaxLogFileSizeBytes = 1 * 1024 * 1024; // Límite de 1MB para prevenir consumo excesivo de disco
+    private static readonly object _fileLock = new object();
 
     public static void LogInfo(string mensaje)
     {
@@ -47,14 +48,17 @@ public static class LoggerService
     {
         try
         {
-            FileInfo fileInfo = new FileInfo(LogFilePath);
-            // Rotación básica: si supera el límite de 1MB, se sobrescribe para evitar saturación de disco (DoS)
-            if (fileInfo.Exists && fileInfo.Length > MaxLogFileSizeBytes)
+            lock (_fileLock)
             {
-                File.WriteAllText(LogFilePath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] --- LOG ROTADO POR TAMAÑO LÍMITE ---" + Environment.NewLine);
-            }
+                FileInfo fileInfo = new FileInfo(LogFilePath);
+                // Rotación básica: si supera el límite de 1MB, se sobrescribe para evitar saturación de disco (DoS)
+                if (fileInfo.Exists && fileInfo.Length > MaxLogFileSizeBytes)
+                {
+                    File.WriteAllText(LogFilePath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] --- LOG ROTADO POR TAMAÑO LÍMITE ---" + Environment.NewLine);
+                }
 
-            File.AppendAllText(LogFilePath, contenido + Environment.NewLine);
+                File.AppendAllText(LogFilePath, contenido + Environment.NewLine);
+            }
         }
         catch (Exception ex)
         {
