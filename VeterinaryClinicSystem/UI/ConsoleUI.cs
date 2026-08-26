@@ -95,7 +95,9 @@ public class ConsoleUI
         string nombre = Console.ReadLine()!;
         while (string.IsNullOrWhiteSpace(nombre) || !nombre.Any(char.IsLetter))
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("Nombre no válido. Por favor, escriba un nombre válido: ");
+            Console.ResetColor();
             nombre = Console.ReadLine()!;
         }
 
@@ -108,22 +110,99 @@ public class ConsoleUI
             Console.ResetColor();
         }
 
-        Console.Write("Ingrese síntoma principal: ");
+        Console.Write("Ingrese el número de teléfono: ");
+        string telefono = Console.ReadLine()!;
+        while (string.IsNullOrWhiteSpace(telefono))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Error: El teléfono no puede estar vacío. Ingrese un teléfono: ");
+            Console.ResetColor();
+            telefono = Console.ReadLine()!;
+        }
+
+        Console.Write("Ingrese motivo de consulta / síntoma principal: ");
         string sintoma = Console.ReadLine()!;
 
         try
         {
             Console.WriteLine("[UI] Guardando paciente de forma asíncrona...");
-            var nuevoPaciente = await _patientService.RegistrarPacienteAsync(nombre, edad, sintoma);
+            var nuevoPaciente = await _patientService.RegistrarPacienteAsync(nombre, edad, sintoma, telefono);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"[UI] ¡Éxito! Paciente registrado de forma asíncrona con ID {nuevoPaciente.Id}");
             Console.ResetColor();
+
+            // Opción para registrar 0, 1 o varias mascotas para el paciente
+            Console.Write("\n¿Desea registrar mascotas para este paciente? (s/n): ");
+            string respuesta = Console.ReadLine()?.Trim().ToLowerInvariant() ?? "n";
+
+            while (respuesta == "s" || respuesta == "si" || respuesta == "sí")
+            {
+                await RegistrarMascotaFormularioAsync(nuevoPaciente.Id);
+
+                Console.Write("\n¿Desea registrar otra mascota para este paciente? (s/n): ");
+                respuesta = Console.ReadLine()?.Trim().ToLowerInvariant() ?? "n";
+            }
         }
         catch (Exception ex)
         {
             LoggerService.LogError("Error al registrar paciente desde UI Asíncrona", ex);
             Console.WriteLine($"Error de registro: {ex.Message}");
         }
+    }
+
+    private async Task RegistrarMascotaFormularioAsync(Guid? clienteId)
+    {
+        Console.WriteLine("\n  --- REGISTRAR MASCOTA ---");
+        Console.Write("  Ingrese el nombre de la mascota: ");
+        string nombreMascota = Console.ReadLine()!;
+        while (string.IsNullOrWhiteSpace(nombreMascota))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("  Error: El nombre no puede estar vacío: ");
+            Console.ResetColor();
+            nombreMascota = Console.ReadLine()!;
+        }
+
+        Console.Write("  Ingrese la especie (ej. Perro, Gato, Ave): ");
+        string especie = Console.ReadLine()!;
+        while (string.IsNullOrWhiteSpace(especie))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("  Error: La especie no puede estar vacía: ");
+            Console.ResetColor();
+            especie = Console.ReadLine()!;
+        }
+
+        Console.Write("  Ingrese la raza (opcional, presione Enter para 'Sin Raza'): ");
+        string raza = Console.ReadLine()!;
+        if (string.IsNullOrWhiteSpace(raza)) raza = "Sin Raza";
+
+        Console.Write("  Ingrese la edad en meses: ");
+        int edadMeses;
+        while (!int.TryParse(Console.ReadLine(), out edadMeses) || edadMeses < 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("  Error: Ingrese un número entero válido (>= 0): ");
+            Console.ResetColor();
+        }
+
+        Console.Write("  Ingrese el peso en kg (ej. 12.5): ");
+        double peso;
+        while (!double.TryParse(Console.ReadLine(), out peso) || peso <= 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("  Error: Ingrese un peso válido mayor a 0: ");
+            Console.ResetColor();
+        }
+
+        Console.Write("  Ingrese motivo de consulta / síntoma de la mascota: ");
+        string motivoMascota = Console.ReadLine()!;
+
+        Console.WriteLine("  [UI] Guardando mascota de forma asíncrona...");
+        var mascota = await _patientService.RegistrarMascotaAsync(clienteId, nombreMascota, edadMeses, peso, motivoMascota, especie, raza);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"  [UI] ¡Éxito! Mascota '{mascota.Nombre}' ({mascota.Especie}) registrada con ID {mascota.Id} ({mascota.EmitirSonido()})");
+        Console.ResetColor();
     }
 
     private void ListarPacientes()
@@ -134,19 +213,34 @@ public class ConsoleUI
         if (!pacientes.Any())
         {
             Console.WriteLine("No hay pacientes registrados.");
-            return;
+        }
+        else
+        {
+            foreach (var p in pacientes)
+            {
+                Console.WriteLine(p.ObtenerInformacion());
+                if (p.Mascotas.Any())
+                {
+                    Console.WriteLine("  Mascotas:");
+                    foreach (var m in p.Mascotas)
+                    {
+                        Console.WriteLine($"    - {m.Nombre} ({m.Especie}, Raza: {m.Raza}, Edad: {m.EdadEnMeses} meses, Peso: {m.Peso}kg, Motivo: {m.MotivoConsulta}) | Sonido: {m.EmitirSonido()}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("  (Sin mascotas registradas)");
+                }
+            }
         }
 
-        foreach (var p in pacientes)
+        var sinDueno = _patientService.ObtenerMascotasSinDueno();
+        if (sinDueno.Any())
         {
-            Console.WriteLine(p.ObtenerInformacion());
-            if (p.Mascotas.Any())
+            Console.WriteLine("\n--- MASCOTAS SIN DUEÑO / EN RESCATE O ADOPCIÓN ---");
+            foreach (var m in sinDueno)
             {
-                Console.WriteLine("  Mascotas:");
-                foreach (var m in p.Mascotas)
-                {
-                    Console.WriteLine($"    - {m.Nombre} ({m.Especie}, Raza: {m.Raza}) | Sonido: {m.EmitirSonido()}");
-                }
+                Console.WriteLine($"  - {m.Nombre} ({m.Especie}, Raza: {m.Raza}, Edad: {m.EdadEnMeses} meses, Peso: {m.Peso}kg, Motivo: {m.MotivoConsulta}) | Sonido: {m.EmitirSonido()}");
             }
         }
     }
@@ -162,6 +256,15 @@ public class ConsoleUI
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(paciente.ObtenerInformacion());
             Console.ResetColor();
+
+            if (paciente.Mascotas.Any())
+            {
+                Console.WriteLine("  Mascotas asociadas:");
+                foreach (var m in paciente.Mascotas)
+                {
+                    Console.WriteLine($"    - {m.Nombre} ({m.Especie}, Raza: {m.Raza}, Edad: {m.EdadEnMeses} meses, Peso: {m.Peso}kg, Motivo: {m.MotivoConsulta}) | Sonido: {m.EmitirSonido()}");
+                }
+            }
         }
         else
         {

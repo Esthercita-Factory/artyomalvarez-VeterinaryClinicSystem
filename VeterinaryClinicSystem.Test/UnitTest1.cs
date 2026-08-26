@@ -101,4 +101,79 @@ public class ClinicSystemUseCaseTests
         Assert.Equal("¡Guau Guau!", perro.EmitirSonido());
         Assert.Equal("¡Miau Miau!", gato.EmitirSonido());
     }
+
+    [Fact]
+    public async Task CasoUso8_RegistrarClienteConTelefono_DeberiaGuardarTelefonoCorrectamente()
+    {
+        // Act
+        var cliente = await _service.RegistrarPacienteAsync("Roberto Gomez", 40, "Vacunación", "555-987-6543");
+
+        // Assert
+        Assert.NotNull(cliente);
+        Assert.Equal("555-987-6543", cliente.Telefono);
+    }
+
+    [Fact]
+    public async Task CasoUso9_RegistrarMascotaParaCliente_DeberiaAsociarMascotaAlClienteYRepositorio()
+    {
+        // Arrange
+        var cliente = await _service.RegistrarPacienteAsync("Laura Pausini", 33, "Consulta general", "555-112-2334");
+
+        // Act
+        var mascota = await _service.RegistrarMascotaAsync(cliente.Id, "Rocky", 18, 14.2, "Revisión dental", "Perro", "Beagle");
+
+        // Assert
+        Assert.NotNull(mascota);
+        Assert.NotNull(mascota.Dueno);
+        Assert.Equal("Laura Pausini", mascota.Dueno.Nombre);
+        Assert.False(mascota.EsCallejera);
+        Assert.Contains(cliente.Mascotas, m => m.Nombre == "Rocky");
+        var mascotasDelCliente = _mascotaRepository.ObtenerPorClienteId(cliente.Id);
+        Assert.Contains(mascotasDelCliente, m => m.Nombre == "Rocky");
+    }
+
+    [Fact]
+    public async Task CasoUso10_RegistrarMascotaSinDueno_DeberiaGuardarseEnMascotaRepositorySinDueno()
+    {
+        // Act
+        var mascotaSinDueno = await _service.RegistrarMascotaAsync(null, "Callejerito", 6, 3.5, "Rescate", "Gato", "Criollo");
+
+        // Assert
+        Assert.NotNull(mascotaSinDueno);
+        Assert.Null(mascotaSinDueno.Dueno);
+        Assert.True(mascotaSinDueno.EsCallejera);
+        var sinDueno = _mascotaRepository.ObtenerSinDueno();
+        Assert.Contains(sinDueno, m => m.Nombre == "Callejerito");
+    }
+
+    [Fact]
+    public async Task CasoUso11_EliminarCliente_DeberiaDesvincularMascotasYDejarlasSinDueno()
+    {
+        // Arrange
+        var cliente = await _service.RegistrarPacienteAsync("Pedro Infante", 50, "Chequeo", "555-777-8899");
+        var mascota = await _service.RegistrarMascotaAsync(cliente.Id, "Torito", 24, 25.0, "Vacunación", "Perro", "Bulldog");
+
+        // Act
+        bool eliminado = _service.EliminarPaciente(cliente.Id);
+
+        // Assert
+        Assert.True(eliminado);
+        Assert.Null(mascota.Dueno);
+        Assert.True(mascota.EsCallejera);
+        var mascotasDelCliente = _mascotaRepository.ObtenerPorClienteId(cliente.Id);
+        Assert.Empty(mascotasDelCliente);
+        var sinDueno = _service.ObtenerMascotasSinDueno();
+        Assert.Contains(sinDueno, m => m.Nombre == "Torito");
+    }
+
+    [Fact]
+    public async Task CasoUso12_ObtenerMascotasSinDueno_DeberiaRetornarListaCorrecta()
+    {
+        // Act
+        await _service.RegistrarMascotaAsync(null, "Pelusa", 10, 3.0, "Revisión general", "Gato", "Angora");
+        var listaSinDueno = _service.ObtenerMascotasSinDueno();
+
+        // Assert
+        Assert.Contains(listaSinDueno, m => m.Nombre == "Pelusa");
+    }
 }

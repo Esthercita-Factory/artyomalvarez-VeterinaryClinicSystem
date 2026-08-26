@@ -64,6 +64,7 @@ classDiagram
     class Pet {
         +double Peso
         +string Raza
+        +Patient Dueno
         +EmitirSonido() string
     }
 

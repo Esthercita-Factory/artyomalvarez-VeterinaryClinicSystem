@@ -7,13 +7,20 @@ public class Pet : Animal
     public double Peso { get; set; }
     public string MotivoConsulta { get; set; }
     public string Raza { get; set; }
+    
+    // Propiedad que modela el dueño (null si es callejera / rescatada)
+    public Patient? Dueno { get; set; }
 
-    public Pet(Guid id, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza")
+    // Indica si la mascota no tiene dueño (es callejera o rescatada)
+    public bool EsCallejera => Dueno == null;
+
+    public Pet(Guid id, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza", Patient? dueno = null)
         : base(id, nombre, edadEnMeses, especie)
     {
         Peso = peso;
         MotivoConsulta = motivoConsulta;
         Raza = raza;
+        Dueno = dueno;
     }
 
     public override string EmitirSonido()
@@ -30,6 +37,10 @@ public class Pet : Animal
 
     public override string ObtenerInformacion()
     {
-        return $"[MASCOTA] ID: {Id} | Nombre: {Nombre} | Especie: {Especie} | Raza: {Raza} | Edad: {EdadEnMeses} meses | Peso: {Peso}kg";
+        string estadoDueno = Dueno != null 
+            ? $"Dueño: {Dueno.Nombre} (Tel: {Dueno.Telefono})" 
+            : "Condición: Callejera / Rescatada (Sin dueño)";
+
+        return $"[MASCOTA] ID: {Id} | Nombre: {Nombre} | Especie: {Especie} | Raza: {Raza} | Edad: {EdadEnMeses} meses | Peso: {Peso}kg | {estadoDueno}";
     }
 }

@@ -27,19 +27,21 @@ public class PatientService : IPatientService
 
     private void CargarDatosIniciales()
     {
-        var p1 = new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo de rutina");
+        var p1 = new Patient(Guid.NewGuid(), "Carlos Pérez", 35, "Chequeo de rutina", "555-1234");
         var m1 = new Pet(Guid.NewGuid(), "Firulais", 24, 12.5, "Vacunación", "Perro", "Labrador");
         var m2 = new Pet(Guid.NewGuid(), "Michi", 12, 4.0, "Fiebre", "Gato", "Siames");
         p1.AgregarMascota(m1);
         p1.AgregarMascota(m2);
 
-        var p2 = new Patient(Guid.NewGuid(), "Ana Gómez", 28, "Consulta general");
+        var p2 = new Patient(Guid.NewGuid(), "Ana Gómez", 28, "Consulta general", "555-5678");
         var m3 = new Pet(Guid.NewGuid(), "Rex", 36, 20.0, "Cojera", "Perro", "Pastor Alemán");
         p2.AgregarMascota(m3);
 
-        var p3 = new Patient(Guid.NewGuid(), "Beatriz López", 42, "Control de peso");
+        var p3 = new Patient(Guid.NewGuid(), "Beatriz López", 42, "Control de peso", "555-9012");
         var m4 = new Pet(Guid.NewGuid(), "Garfield", 48, 6.5, "Sobrepeso", "Gato", "Persa");
         p3.AgregarMascota(m4);
+
+        var m5 = new Pet(Guid.NewGuid(), "Pelusa", 8, 3.2, "Rescate urbano", "Gato", "Mestizo");
 
         _clienteRepository.Agregar(p1);
         _mascotaRepository.Agregar(m1, p1.Id);
@@ -50,6 +52,8 @@ public class PatientService : IPatientService
 
         _clienteRepository.Agregar(p3);
         _mascotaRepository.Agregar(m4, p3.Id);
+
+        _mascotaRepository.Agregar(m5, null);
     }
 
     public IReadOnlyList<Patient> ObtenerTodosLosPacientes()
@@ -100,6 +104,90 @@ public class PatientService : IPatientService
         return nuevoPaciente;
     }
 
+    public Pet RegistrarMascota(Guid? clienteId, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza")
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            throw new ArgumentException("El nombre de la mascota no puede estar vacío.", nameof(nombre));
+        }
+
+        if (edadEnMeses < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(edadEnMeses), "La edad en meses no puede ser negativa.");
+        }
+
+        if (peso <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(peso), "El peso debe ser mayor a 0.");
+        }
+
+        string especieLimpia = string.IsNullOrWhiteSpace(especie) ? "Indeterminada" : especie.Trim();
+        string razaLimpia = string.IsNullOrWhiteSpace(raza) ? "Sin Raza" : raza.Trim();
+        string motivoLimpio = string.IsNullOrWhiteSpace(motivoConsulta) ? "Sin motivo especificado" : motivoConsulta.Trim();
+
+        var nuevaMascota = new Pet(Guid.NewGuid(), nombre.Trim(), edadEnMeses, peso, motivoLimpio, especieLimpia, razaLimpia);
+
+        if (clienteId.HasValue)
+        {
+            var cliente = _clienteRepository.ObtenerPorId(clienteId.Value);
+            if (cliente != null)
+            {
+                cliente.AgregarMascota(nuevaMascota);
+            }
+        }
+
+        _mascotaRepository.Agregar(nuevaMascota, clienteId);
+        LoggerService.LogInfo($"[SÍNCRONO] Mascota '{nuevaMascota.Nombre}' ({nuevaMascota.Especie}) registrada con ID {nuevaMascota.Id}{(clienteId.HasValue ? $" para el cliente {clienteId}" : " (Sin dueño)")}");
+        return nuevaMascota;
+    }
+
+    public async Task<Pet> RegistrarMascotaAsync(Guid? clienteId, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza")
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            throw new ArgumentException("El nombre de la mascota no puede estar vacío.", nameof(nombre));
+        }
+
+        if (edadEnMeses < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(edadEnMeses), "La edad en meses no puede ser negativa.");
+        }
+
+        if (peso <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(peso), "El peso debe ser mayor a 0.");
+        }
+
+        string especieLimpia = string.IsNullOrWhiteSpace(especie) ? "Indeterminada" : especie.Trim();
+        string razaLimpia = string.IsNullOrWhiteSpace(raza) ? "Sin Raza" : raza.Trim();
+        string motivoLimpio = string.IsNullOrWhiteSpace(motivoConsulta) ? "Sin motivo especificado" : motivoConsulta.Trim();
+
+        var nuevaMascota = new Pet(Guid.NewGuid(), nombre.Trim(), edadEnMeses, peso, motivoLimpio, especieLimpia, razaLimpia);
+
+        if (clienteId.HasValue)
+        {
+            var cliente = _clienteRepository.ObtenerPorId(clienteId.Value);
+            if (cliente != null)
+            {
+                cliente.AgregarMascota(nuevaMascota);
+            }
+        }
+
+        await _mascotaRepository.AgregarAsync(nuevaMascota, clienteId);
+        LoggerService.LogInfo($"[ASÍNCRONO] Mascota '{nuevaMascota.Nombre}' ({nuevaMascota.Especie}) registrada con ID {nuevaMascota.Id}{(clienteId.HasValue ? $" para el cliente {clienteId}" : " (Sin dueño)")}");
+        return nuevaMascota;
+    }
+
+    public IReadOnlyList<Pet> ObtenerMascotasSinDueno()
+    {
+        return _mascotaRepository.ObtenerSinDueno();
+    }
+
+    public IReadOnlyList<Pet> ObtenerTodasLasMascotas()
+    {
+        return _mascotaRepository.ObtenerTodas();
+    }
+
     public Patient? BuscarPorNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre)) return null;
@@ -138,6 +226,7 @@ public class PatientService : IPatientService
 
     public bool EliminarPaciente(Guid id)
     {
+        _mascotaRepository.DesvincularMascotasDeCliente(id);
         return _clienteRepository.Eliminar(id);
     }
 

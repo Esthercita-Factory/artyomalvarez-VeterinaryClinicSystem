@@ -11,10 +11,12 @@ namespace VeterinaryClinicSystem.Repositories;
 /// </summary>
 public interface IMascotaRepository
 {
-    void Agregar(Pet mascota, Guid clienteId);
-    Task AgregarAsync(Pet mascota, Guid clienteId);
+    void Agregar(Pet mascota, Guid? clienteId = null);
+    Task AgregarAsync(Pet mascota, Guid? clienteId = null);
     IReadOnlyList<Pet> ObtenerTodas();
     IReadOnlyList<Pet> ObtenerPorClienteId(Guid clienteId);
+    IReadOnlyList<Pet> ObtenerSinDueno();
     Pet? ObtenerPorId(Guid id);
+    bool DesvincularMascotasDeCliente(Guid clienteId);
     bool Eliminar(Guid id);
 }

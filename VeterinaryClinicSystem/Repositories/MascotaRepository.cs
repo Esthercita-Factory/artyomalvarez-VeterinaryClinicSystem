@@ -13,15 +13,15 @@ namespace VeterinaryClinicSystem.Repositories;
 /// </summary>
 public class MascotaRepository : IMascotaRepository
 {
-    private readonly ConcurrentDictionary<Guid, (Pet Mascota, Guid ClienteId)> _mascotasPorId = new ConcurrentDictionary<Guid, (Pet, Guid)>();
+    private readonly ConcurrentDictionary<Guid, (Pet Mascota, Guid? ClienteId)> _mascotasPorId = new ConcurrentDictionary<Guid, (Pet, Guid?)>();
 
-    public void Agregar(Pet mascota, Guid clienteId)
+    public void Agregar(Pet mascota, Guid? clienteId = null)
     {
         if (mascota == null) throw new ArgumentNullException(nameof(mascota));
         _mascotasPorId[mascota.Id] = (mascota, clienteId);
     }
 
-    public async Task AgregarAsync(Pet mascota, Guid clienteId)
+    public async Task AgregarAsync(Pet mascota, Guid? clienteId = null)
     {
         if (mascota == null) throw new ArgumentNullException(nameof(mascota));
         await Task.Delay(500); // Simula persistencia I/O
@@ -42,6 +42,15 @@ public class MascotaRepository : IMascotaRepository
             .AsReadOnly();
     }
 
+    public IReadOnlyList<Pet> ObtenerSinDueno()
+    {
+        return _mascotasPorId.Values
+            .Where(tuple => tuple.ClienteId == null)
+            .Select(tuple => tuple.Mascota)
+            .ToList()
+            .AsReadOnly();
+    }
+
     public Pet? ObtenerPorId(Guid id)
     {
         if (_mascotasPorId.TryGetValue(id, out var tuple))
@@ -49,6 +58,21 @@ public class MascotaRepository : IMascotaRepository
             return tuple.Mascota;
         }
         return null;
+    }
+
+    public bool DesvincularMascotasDeCliente(Guid clienteId)
+    {
+        bool modificado = false;
+        foreach (var kvp in _mascotasPorId)
+        {
+            if (kvp.Value.ClienteId == clienteId)
+            {
+                kvp.Value.Mascota.Dueno = null;
+                _mascotasPorId[kvp.Key] = (kvp.Value.Mascota, null);
+                modificado = true;
+            }
+        }
+        return modificado;
     }
 
     public bool Eliminar(Guid id)

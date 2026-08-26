@@ -13,6 +13,10 @@ public interface IPatientService
     IReadOnlyList<Patient> ObtenerTodosLosPacientes();
     Patient RegistrarPaciente(string? nombre, int edad, string? sintoma, string? telefono = "000-000-0000");
     Task<Patient> RegistrarPacienteAsync(string? nombre, int edad, string? sintoma, string? telefono = "000-000-0000");
+    Pet RegistrarMascota(Guid? clienteId, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza");
+    Task<Pet> RegistrarMascotaAsync(Guid? clienteId, string nombre, int edadEnMeses, double peso, string motivoConsulta, string especie, string raza = "Sin Raza");
+    IReadOnlyList<Pet> ObtenerMascotasSinDueno();
+    IReadOnlyList<Pet> ObtenerTodasLasMascotas();
     Patient? BuscarPorNombre(string nombre);
     Pet BuscarMascotaDePaciente(string nombrePaciente, string nombreMascota);
     bool ModificarNombrePaciente(Guid id, string nuevoNombre);
