@@ -248,8 +248,6 @@ classDiagram
     ConsoleUI --> IPatientService : Inyección
 ```
 
-![Diagrama de Clases UML](docs/diagrama_uml.png)
-
 ---
 
 ## Estructura de Carpetas
@@ -265,7 +263,6 @@ artyomalvarez-VeterinaryClinicSystem/
 │   └── Program.cs            # Punto de inicio del programa
 ├── VeterinaryClinicSystem.Test/
 │   └── UnitTest1.cs          # Pruebas unitarias con xUnit
-├── docs/                     # Diagramas e imagenes
 └── README.md                 # Documentacion del proyecto
 ```
 
