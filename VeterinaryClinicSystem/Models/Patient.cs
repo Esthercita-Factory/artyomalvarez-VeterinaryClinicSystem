@@ -55,6 +55,8 @@ public class Patient : Persona, INotificable
 
     public void EnviarNotificacion(string mensaje)
     {
-        // Genera la representación de notificación sin acoplarse a UI directas
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"[NOTIFICACIÓN ENVIADA] Para: {Nombre} (Tel: {Telefono}) -> \"{mensaje}\"");
+        Console.ResetColor();
     }
 }

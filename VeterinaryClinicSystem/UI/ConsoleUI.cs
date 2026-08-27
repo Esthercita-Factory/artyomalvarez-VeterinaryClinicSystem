@@ -72,7 +72,7 @@ public class ConsoleUI
     private void MostrarMenu()
     {
         Console.WriteLine("\n==============================================");
-        Console.WriteLine("    SISTEMA VETERINARIO - ASINCRONÍA Y TAREAS");
+        Console.WriteLine("  ---------    SISTEMA VETERINARIO ------------- ");
         Console.WriteLine("==============================================");
         Console.WriteLine("1. Registrar nuevo paciente (Asíncrono - Task.Delay)");
         Console.WriteLine("2. Listar pacientes y sus mascotas");
@@ -315,12 +315,20 @@ public class ConsoleUI
 
     private void DemostrarInterfacesYNotificaciones()
     {
-        Console.WriteLine("\n=== DEMOSTRACIÓN DE INTERFACES Y NOTIFICACIONES ===");
+        Console.WriteLine("\n=== DEMOSTRACIÓN DE INTERFACES MÚLTIPLES ===");
         var paciente = _patientService.ObtenerTodosLosPacientes().FirstOrDefault();
         if (paciente != null)
         {
+            // 1. Contrato IRegistrable (Heredado de Persona)
+            IRegistrable registrable = paciente;
+            Console.WriteLine("1. Demostración de contrato IRegistrable:");
+            Console.WriteLine($"   -> Información obtenida vía interfaz: {registrable.ObtenerInformacion()}");
+
+            // 2. Contrato INotificable (Implementado directamente por Patient)
             INotificable notificable = paciente;
-            notificable.EnviarNotificacion("Recordatorio: Su mascota tiene cita programada mañana.");
+            Console.WriteLine("2. Demostración de contrato INotificable:");
+            Console.Write("   -> ");
+            notificable.EnviarNotificacion("Recordatorio: Su mascota tiene cita médica programada para mañana.");
         }
         else
         {

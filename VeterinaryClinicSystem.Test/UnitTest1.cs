@@ -9,7 +9,9 @@ using VeterinaryClinicSystem.Exceptions;
 
 namespace VeterinaryClinicSystem.Test;
 
-public class ClinicSystemUseCaseTests
+public class 
+    
+    ClinicSystemUseCaseTests
 {
     private readonly IClienteRepository _clienteRepository;
     private readonly IMascotaRepository _mascotaRepository;
@@ -175,5 +177,26 @@ public class ClinicSystemUseCaseTests
 
         // Assert
         Assert.Contains(listaSinDueno, m => m.Nombre == "Pelusa");
+    }
+
+    [Fact]
+    public void CasoUso13_PacienteImplementaInterfacesMultiples_DeberiaComportarseSegunContratos()
+    {
+        // Arrange
+        var paciente = new Patient(Guid.NewGuid(), "Ana Gomez", 28, "Consulta", "555-4321");
+
+        // Act & Assert (IRegistrable)
+        IRegistrable registrable = paciente;
+        Assert.NotNull(registrable);
+        string info = registrable.ObtenerInformacion();
+        Assert.Contains("Ana Gomez", info);
+        Assert.Contains("555-4321", info);
+
+        // Act & Assert (INotificable)
+        INotificable notificable = paciente;
+        Assert.NotNull(notificable);
+        // No lanza excepción al invocar EnviarNotificacion
+        var exception = Record.Exception(() => notificable.EnviarNotificacion("Test Mensaje"));
+        Assert.Null(exception);
     }
 }
